@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Security.Claims;
 
-namespace AspNetCore.Identity.DocumentDb.Stores
+namespace AspNetCore.Identity.DocumentDb
 {
     public class DocumentDbUserStore<TUser> :
         IUserStore<TUser>,

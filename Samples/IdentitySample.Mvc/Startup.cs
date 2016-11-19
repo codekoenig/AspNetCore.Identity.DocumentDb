@@ -4,8 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,11 +12,23 @@ using IdentitySample.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using System.IO;
+using AspNetCore.Identity.DocumentDb;
+using Microsoft.Azure.Documents.Client;
 
 namespace IdentitySample
+
 {
+
+    public class DocumentDbClientConfig
+    {
+        public string EndpointUri;
+        public string AuthenticationKey;
+    }
+
     public class Startup
     {
+
+
         public Startup(IHostingEnvironment env)
         {
             // Set up configuration sources.
@@ -42,16 +52,19 @@ namespace IdentitySample
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add framework services.
-            services.AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
+            // Add DocumentDb client singleton instance (it's recommended to use a singleton instance for it)
+            services.AddSingleton(new DocumentClient(
+                Configuration.GetValue<Uri>("DocumentDbClient:EndpointUri"), 
+                Configuration.GetValue<string>("DocumentDbClient:AuthenticationKey")));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>(options => {
+            // Add framework services.
+            services.AddIdentity<ApplicationUser, DocumentDbIdentityRole>(options => {
                 options.Cookies.ApplicationCookie.AuthenticationScheme = "ApplicationCookie";
                 options.Cookies.ApplicationCookie.CookieName = "Interop";
                 options.Cookies.ApplicationCookie.DataProtectionProvider = DataProtectionProvider.Create(new DirectoryInfo("C:\\Github\\Identity\\artifacts"));
             })
-                .AddEntityFrameworkStores<ApplicationDbContext>()
+                //.AddEntityFrameworkStores<ApplicationDbContext>()
+                .AddDocumentDbStores(options => options.DocumentCollection = "Users")
                 .AddDefaultTokenProviders();
 
             services.AddMvc();
@@ -70,23 +83,10 @@ namespace IdentitySample
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
-
-                // For more details on creating database during deployment see http://go.microsoft.com/fwlink/?LinkID=615859
-                try
-                {
-                    using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>()
-                        .CreateScope())
-                    {
-                        serviceScope.ServiceProvider.GetService<ApplicationDbContext>()
-                             .Database.Migrate();
-                    }
-                }
-                catch { }
             }
             app.UseStaticFiles();
 

@@ -1,10 +1,10 @@
-﻿{
+{
   "version": "1.0.0-*",
 
   "dependencies": {
     "Microsoft.AspNetCore.Identity": "1.1.0",
     "Microsoft.Azure.DocumentDB.Core": "0.1.0-preview",
-    "NETStandard.Library": "1.6.0"
+    "NETStandard.Library": "1.6.1"
   },
 
   "frameworks": {
