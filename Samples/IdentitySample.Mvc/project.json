@@ -43,7 +43,6 @@
   },
   "tools": {
     "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.0.0-*",
-    "Microsoft.EntityFrameworkCore.Tools.DotNet": "1.0.0-*"
   },
   "publishOptions": {
     "include": [

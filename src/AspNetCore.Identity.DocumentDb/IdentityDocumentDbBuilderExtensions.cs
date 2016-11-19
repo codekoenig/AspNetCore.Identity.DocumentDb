@@ -26,8 +26,9 @@ namespace AspNetCore.Identity.DocumentDb
                 typeof(IUserStore<>).MakeGenericType(builder.UserType),
                 typeof(DocumentDbUserStore<>).MakeGenericType(builder.UserType));
 
-            //builder.Services.AddSingleton<IRoleStore<TRole>, RoleStore<TRole>>();
-            //builder.Services.AddSingleton<ILookupNormalizer, LookupNormalizer>();
+            builder.Services.AddSingleton(
+                typeof(IRoleStore<>).MakeGenericType(builder.RoleType),
+                typeof(DocumentDbRoleStore<>).MakeGenericType(builder.RoleType));
 
             return builder;
         }

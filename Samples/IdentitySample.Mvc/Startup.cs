@@ -16,10 +16,8 @@ using AspNetCore.Identity.DocumentDb;
 using Microsoft.Azure.Documents.Client;
 
 namespace IdentitySample
-
 {
-
-    public class DocumentDbClientConfig
+    public struct DocumentDbClientConfig
     {
         public string EndpointUri;
         public string AuthenticationKey;
@@ -27,8 +25,6 @@ namespace IdentitySample
 
     public class Startup
     {
-
-
         public Startup(IHostingEnvironment env)
         {
             // Set up configuration sources.
@@ -55,7 +51,7 @@ namespace IdentitySample
             // Add DocumentDb client singleton instance (it's recommended to use a singleton instance for it)
             services.AddSingleton(new DocumentClient(
                 Configuration.GetValue<Uri>("DocumentDbClient:EndpointUri"), 
-                Configuration.GetValue<string>("DocumentDbClient:AuthenticationKey")));
+                Configuration.GetValue<string>("DocumentDbClient:AuthorizationKey")));
 
             // Add framework services.
             services.AddIdentity<ApplicationUser, DocumentDbIdentityRole>(options => {
