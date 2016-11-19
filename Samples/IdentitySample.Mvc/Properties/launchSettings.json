@@ -15,8 +15,10 @@
         "ASPNET_ENVIRONMENT": "Development"
       }
     },
-    "web": {
-      "commandName": "web",
+    "IdentitySample.Mvc": {
+      "commandName": "Project",
+      "launchUrl": "http://localhost:5330",
+      "launchBrowser": true,
       "environmentVariables": {
         "ASPNET_ENVIRONMENT": "Development"
       }
