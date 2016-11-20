@@ -17,7 +17,7 @@
     },
     "IdentitySample.Mvc": {
       "commandName": "Project",
-      "launchUrl": "http://localhost:5330",
+      "launchUrl": "http://localhost:5000",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNET_ENVIRONMENT": "Development"

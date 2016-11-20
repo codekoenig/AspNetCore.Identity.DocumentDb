@@ -4,12 +4,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
+using Microsoft.Azure.Documents.Client;
 
 namespace AspNetCore.Identity.DocumentDb
 {
     public class DocumentDbRoleStore<TRole> : IRoleStore<TRole>
         where TRole : DocumentDbIdentityRole
     {
+        private DocumentClient documentClient;
+
+        public DocumentDbRoleStore(DocumentClient documentClient)
+        {
+            this.documentClient = documentClient;
+        }
         public Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();

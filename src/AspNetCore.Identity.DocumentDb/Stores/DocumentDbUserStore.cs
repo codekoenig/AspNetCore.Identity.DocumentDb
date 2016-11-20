@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using System.Security.Claims;
+using Microsoft.Azure.Documents.Client;
 
 namespace AspNetCore.Identity.DocumentDb
 {
@@ -21,6 +22,13 @@ namespace AspNetCore.Identity.DocumentDb
         IUserLockoutStore<TUser>
         where TUser: DocumentDbIdentityUser
     {
+        private DocumentClient documentClient;
+
+        public DocumentDbUserStore(DocumentClient documentClient)
+        {
+            this.documentClient = documentClient;
+        }
+
         public Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
