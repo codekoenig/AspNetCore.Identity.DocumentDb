@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.DataProtection;
 using System.IO;
 using AspNetCore.Identity.DocumentDb;
 using Microsoft.Azure.Documents.Client;
+using Microsoft.Azure.Documents;
+using System.Net;
 
 namespace IdentitySample
 {
@@ -49,7 +51,7 @@ namespace IdentitySample
         public void ConfigureServices(IServiceCollection services)
         {
             // Add DocumentDb client singleton instance (it's recommended to use a singleton instance for it)
-            services.AddSingleton(new DocumentClient(
+            services.AddSingleton(InitializeDocumentClient(
                 Configuration.GetValue<Uri>("DocumentDbClient:EndpointUri"), 
                 Configuration.GetValue<string>("DocumentDbClient:AuthorizationKey")));
 
@@ -95,6 +97,50 @@ namespace IdentitySample
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
+
+        private DocumentClient InitializeDocumentClient(Uri endpointUri, string authorizationKey)
+        {
+            // Create a DocumentClient and an initial collection (if it does not exist yet) for sample purposes
+            DocumentClient client = new DocumentClient(endpointUri, authorizationKey);
+
+            try
+            {
+                // Does the DB exist?
+                var db = client.ReadDatabaseAsync("AspNetCoreIdentitySample").Result;
+            }
+            catch (DocumentClientException ex)
+            {
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    // Create DB
+                    var db = client.CreateDatabaseAsync(new Database() { Id = "AspNetCoreIdentitySample" }).Result;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            try
+            {
+                // Does the Collection exist?
+                var collection = client.ReadDocumentCollectionAsync("AspNetIdentity").Result;
+            }
+            catch (DocumentClientException ex)
+            {
+                if (ex.StatusCode == HttpStatusCode.NotFound)
+                {
+                    DocumentCollection collection = new DocumentCollection() { Id = "AspNetIdentity" };
+                    collection = client.CreateDocumentCollectionAsync(UriFactory.CreateDatabaseUri("AspNetCoreIdentitySample"), collection).Result;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return client;
         }
     }
 }
