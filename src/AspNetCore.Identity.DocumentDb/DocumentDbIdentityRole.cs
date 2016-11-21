@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.DocumentDb
 {
-    public class DocumentDbIdentityRole
+    public class DocumentDbIdentityRole : DocumentDbIdentityDocument
     {
     }
 }

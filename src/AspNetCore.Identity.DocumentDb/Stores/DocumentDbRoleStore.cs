@@ -5,6 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.Azure.Documents.Client;
+using Microsoft.Extensions.Options;
+using Microsoft.Azure.Documents;
 
 namespace AspNetCore.Identity.DocumentDb
 {
@@ -12,11 +14,25 @@ namespace AspNetCore.Identity.DocumentDb
         where TRole : DocumentDbIdentityRole
     {
         private DocumentClient documentClient;
+        private DocumentDbOptions options;
+        private ILookupNormalizer normalizer;
+        private Uri collectionUri;
+        private RequestOptions requestOptions;
 
-        public DocumentDbRoleStore(DocumentClient documentClient)
+        public DocumentDbRoleStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer)
         {
             this.documentClient = documentClient;
+            this.options = options.Value;
+            this.normalizer = normalizer;
+
+            collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.DocumentCollection);
+
+            if (this.options.PartitionKey != null)
+            {
+                requestOptions = new RequestOptions() { PartitionKey = new PartitionKey(this.options.PartitionKey) };
+            }
         }
+
         public Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
@@ -68,39 +84,15 @@ namespace AspNetCore.Identity.DocumentDb
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-                }
+        private bool disposed = false;
 
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
-            }
-        }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~DocumentDbRoleStore() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
+            // TODO: Workaround, gets disposed too early currently
+            disposed = false;
         }
-        #endregion
 
+        #endregion
     }
 }

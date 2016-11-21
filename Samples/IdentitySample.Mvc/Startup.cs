@@ -52,17 +52,21 @@ namespace IdentitySample
         {
             // Add DocumentDb client singleton instance (it's recommended to use a singleton instance for it)
             services.AddSingleton(InitializeDocumentClient(
-                Configuration.GetValue<Uri>("DocumentDbClient:EndpointUri"), 
+                Configuration.GetValue<Uri>("DocumentDbClient:EndpointUri"),
                 Configuration.GetValue<string>("DocumentDbClient:AuthorizationKey")));
 
             // Add framework services.
-            services.AddIdentity<ApplicationUser, DocumentDbIdentityRole>(options => {
+            services.AddIdentity<ApplicationUser, DocumentDbIdentityRole>(options =>
+            {
                 options.Cookies.ApplicationCookie.AuthenticationScheme = "ApplicationCookie";
                 options.Cookies.ApplicationCookie.CookieName = "Interop";
                 options.Cookies.ApplicationCookie.DataProtectionProvider = DataProtectionProvider.Create(new DirectoryInfo("C:\\Github\\Identity\\artifacts"));
             })
-                //.AddEntityFrameworkStores<ApplicationDbContext>()
-                .AddDocumentDbStores(options => options.DocumentCollection = "Users")
+                .AddDocumentDbStores(options =>
+                {
+                    options.DocumentCollection = "AspNetIdentity";
+                    options.Database = "AspNetCoreIdentitySample";
+                })
                 .AddDefaultTokenProviders();
 
             services.AddMvc();
@@ -102,42 +106,47 @@ namespace IdentitySample
         private DocumentClient InitializeDocumentClient(Uri endpointUri, string authorizationKey)
         {
             // Create a DocumentClient and an initial collection (if it does not exist yet) for sample purposes
-            DocumentClient client = new DocumentClient(endpointUri, authorizationKey);
+            DocumentClient client = new DocumentClient(endpointUri, authorizationKey, new ConnectionPolicy { EnableEndpointDiscovery = false });
 
             try
             {
                 // Does the DB exist?
-                var db = client.ReadDatabaseAsync("AspNetCoreIdentitySample").Result;
+                var db = client.ReadDatabaseAsync(UriFactory.CreateDatabaseUri("AspNetCoreIdentitySample")).Result;
             }
-            catch (DocumentClientException ex)
+            catch (AggregateException ae)
             {
-                if (ex.StatusCode == HttpStatusCode.NotFound)
+                ae.Handle(ex =>
                 {
-                    // Create DB
-                    var db = client.CreateDatabaseAsync(new Database() { Id = "AspNetCoreIdentitySample" }).Result;
-                }
-                else
-                {
-                    throw;
-                }
+                    if (ex.GetType() == typeof(DocumentClientException) && ((DocumentClientException)ex).StatusCode == HttpStatusCode.NotFound)
+                    {
+                        // Create DB
+                        var db = client.CreateDatabaseAsync(new Database() { Id = "AspNetCoreIdentitySample" }).Result;
+                        return true;
+                    }
+
+                    return false;
+                });
             }
 
             try
             {
                 // Does the Collection exist?
-                var collection = client.ReadDocumentCollectionAsync("AspNetIdentity").Result;
+                var collection = client.ReadDocumentCollectionAsync(UriFactory.CreateDocumentCollectionUri("AspNetCoreIdentitySample", "AspNetIdentity")).Result;
             }
-            catch (DocumentClientException ex)
+            catch (AggregateException ae)
             {
-                if (ex.StatusCode == HttpStatusCode.NotFound)
+                ae.Handle(ex =>
                 {
-                    DocumentCollection collection = new DocumentCollection() { Id = "AspNetIdentity" };
-                    collection = client.CreateDocumentCollectionAsync(UriFactory.CreateDatabaseUri("AspNetCoreIdentitySample"), collection).Result;
-                }
-                else
-                {
-                    throw;
-                }
+                    if (ex.GetType() == typeof(DocumentClientException) && ((DocumentClientException)ex).StatusCode == HttpStatusCode.NotFound)
+                    {
+                        DocumentCollection collection = new DocumentCollection() { Id = "AspNetIdentity" };
+                        collection = client.CreateDocumentCollectionAsync(UriFactory.CreateDatabaseUri("AspNetCoreIdentitySample"), collection).Result;
+
+                        return true;
+                    }
+
+                    return false;
+                });
             }
 
             return client;

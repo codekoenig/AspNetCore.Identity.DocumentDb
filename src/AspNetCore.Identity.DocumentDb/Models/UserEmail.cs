@@ -5,7 +5,10 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.DocumentDb.Models
 {
-    public class UserLogin : DocumentDbIdentityDocument
+    public class UserEmail
     {
+        public string Email { get; set; }
+        public string NormalizedEmail { get; set; }
+        public bool Confirmed { get; set; }
     }
 }

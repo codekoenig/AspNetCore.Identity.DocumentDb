@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.DocumentDb
 {
-    public class DocumentDbIdentityUser
+    public class DocumentDbIdentityUser : DocumentDbIdentityDocument
     {
         public string Id { get; set; }
         public string UserName { get; set; }

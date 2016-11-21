@@ -30,6 +30,8 @@ namespace AspNetCore.Identity.DocumentDb
                 typeof(IRoleStore<>).MakeGenericType(builder.RoleType),
                 typeof(DocumentDbRoleStore<>).MakeGenericType(builder.RoleType));
 
+            builder.Services.AddTransient<ILookupNormalizer, LookupNormalizer>();
+
             return builder;
         }
     }
