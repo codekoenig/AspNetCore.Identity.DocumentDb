@@ -234,7 +234,17 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            IList<string> userRoles = user.Roles.Select(r => r.Name).ToList();
+
+            return Task.FromResult(userRoles);
         }
 
         public Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
@@ -287,11 +297,6 @@ namespace AspNetCore.Identity.DocumentDb
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (stamp == null)
-            {
-                throw new ArgumentNullException(nameof(stamp));
-            }
-
             user.SecurityStamp = stamp;
 
             return Task.FromResult(0);
@@ -299,7 +304,15 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task<string> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.SecurityStamp);
         }
 
         public Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken)
@@ -334,7 +347,17 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user.Email = email;
+
+            return Task.FromResult(user.Email);
         }
 
         public Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken)
@@ -352,12 +375,30 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.IsEmailConfirmed);
         }
 
         public Task SetEmailConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user.IsEmailConfirmed = confirmed;
+
+            return Task.FromResult(user.Email);
         }
 
         public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
@@ -367,7 +408,15 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.NormalizedEmail);
         }
 
         public Task SetNormalizedEmailAsync(TUser user, string normalizedEmail, CancellationToken cancellationToken)
@@ -380,7 +429,7 @@ namespace AspNetCore.Identity.DocumentDb
                 throw new ArgumentNullException(nameof(user));
             }
 
-            // TODO: Support normalized Emails
+            user.NormalizedEmail = normalizedEmail;
             
             return Task.FromResult(user.Email);
         }

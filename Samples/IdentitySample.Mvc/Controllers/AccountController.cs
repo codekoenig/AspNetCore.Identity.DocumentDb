@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using IdentitySample.Models;
 using IdentitySample.Models.AccountViewModels;
 using IdentitySample.Services;
+using AspNetCore.Identity.DocumentDb.Models;
 
 namespace IdentitySample.Controllers
 {
