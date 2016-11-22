@@ -56,6 +56,12 @@ namespace AspNetCore.Identity.DocumentDb
                 throw new ArgumentNullException(nameof(user));
             }
 
+            // If no UserId was supplied, generate a GUID
+            if (string.IsNullOrEmpty(user.Id))
+            {
+                user.Id = Guid.NewGuid().ToString();
+            }
+
             var result = await documentClient.CreateDocumentAsync(collectionUri, user);
 
             return result.StatusCode == HttpStatusCode.Created 
@@ -116,7 +122,7 @@ namespace AspNetCore.Identity.DocumentDb
                 throw new ArgumentNullException(nameof(user));
             }
 
-            return Task.FromResult(normalizer.Normalize(user.UserName ?? user.Email));
+            return Task.FromResult(user.Id);
         }
 
         public Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken)
@@ -149,7 +155,7 @@ namespace AspNetCore.Identity.DocumentDb
 
             user.NormalizedUserName = normalizedName;
 
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         public Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken)
@@ -169,7 +175,7 @@ namespace AspNetCore.Identity.DocumentDb
 
             user.UserName = userName;
 
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         public Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
@@ -179,7 +185,15 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.Claims);
         }
 
         public Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
@@ -214,7 +228,15 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.Logins);
         }
 
         public Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
@@ -274,17 +296,33 @@ namespace AspNetCore.Identity.DocumentDb
 
             user.PasswordHash = passwordHash;
 
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         public Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.PasswordHash);
         }
 
         public Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.PasswordHash != null);
         }
 
         public Task SetSecurityStampAsync(TUser user, string stamp, CancellationToken cancellationToken)
@@ -299,7 +337,7 @@ namespace AspNetCore.Identity.DocumentDb
 
             user.SecurityStamp = stamp;
 
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         public Task<string> GetSecurityStampAsync(TUser user, CancellationToken cancellationToken)
@@ -317,32 +355,86 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task SetTwoFactorEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user.IsTwoFactorAuthEnabled = enabled;
+
+            return Task.CompletedTask;
         }
 
         public Task<bool> GetTwoFactorEnabledAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.IsTwoFactorAuthEnabled);
         }
 
         public Task SetPhoneNumberAsync(TUser user, string phoneNumber, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user.PhoneNumber = phoneNumber;
+
+            return Task.CompletedTask;
         }
 
         public Task<string> GetPhoneNumberAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.PhoneNumber);
         }
 
         public Task<bool> GetPhoneNumberConfirmedAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.IsPhoneNumberConfirmed);
         }
 
         public Task SetPhoneNumberConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user.IsPhoneNumberConfirmed = confirmed;
+
+            return Task.CompletedTask;
         }
 
         public Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken)
@@ -436,7 +528,15 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task<DateTimeOffset?> GetLockoutEndDateAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.LockoutEndDate);
         }
 
         public Task SetLockoutEndDateAsync(TUser user, DateTimeOffset? lockoutEnd, CancellationToken cancellationToken)
@@ -451,7 +551,7 @@ namespace AspNetCore.Identity.DocumentDb
 
             user.LockoutEndDate = lockoutEnd;
 
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         public Task<int> IncrementAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)
@@ -466,12 +566,28 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task<int> GetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.AccessFailedCount);
         }
 
         public Task<bool> GetLockoutEnabledAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.LockoutEnabled);
         }
 
         public Task SetLockoutEnabledAsync(TUser user, bool enabled, CancellationToken cancellationToken)
@@ -486,7 +602,7 @@ namespace AspNetCore.Identity.DocumentDb
 
             user.LockoutEnabled = enabled;
 
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
 
         private void ThrowIfDisposed()

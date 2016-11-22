@@ -8,11 +8,12 @@ namespace AspNetCore.Identity.DocumentDb
 {
     public abstract class DocumentDbIdentityDocument
     {
+        [JsonProperty(PropertyName = "documentType")]
         public virtual string DocumentType
         {
             get
             {
-                return this.GetType().ToString();
+                return this.GetType().Name;
             }
         }
     }
