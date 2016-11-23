@@ -7,10 +7,11 @@ using System.Threading;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Options;
 using Microsoft.Azure.Documents;
+using System.Security.Claims;
 
 namespace AspNetCore.Identity.DocumentDb
 {
-    public class DocumentDbRoleStore<TRole> : IRoleStore<TRole>
+    public class DocumentDbRoleStore<TRole> : IRoleClaimStore<TRole>
         where TRole : DocumentDbIdentityRole
     {
         private DocumentClient documentClient;
@@ -33,27 +34,32 @@ namespace AspNetCore.Identity.DocumentDb
             }
         }
 
+        public Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveClaimAsync(TRole role, Claim claim, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
+        public Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<TRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<string> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
@@ -68,17 +74,27 @@ namespace AspNetCore.Identity.DocumentDb
             throw new NotImplementedException();
         }
 
-        public Task SetNormalizedRoleNameAsync(TRole role, string normalizedName, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
         public Task SetRoleNameAsync(TRole role, string roleName, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)
+        public Task<string> GetNormalizedRoleNameAsync(TRole role, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task SetNormalizedRoleNameAsync(TRole role, string normalizedName, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<TRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }
