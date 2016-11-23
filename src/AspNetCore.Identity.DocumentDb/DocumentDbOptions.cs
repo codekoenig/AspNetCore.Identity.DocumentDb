@@ -22,17 +22,5 @@ namespace AspNetCore.Identity.DocumentDb
         /// Gets or sets the name of the DocumentCollection that should be used to store and query roles in DocumentDb.
         /// </summary>
         public string RoleStoreDocumentCollection { get; set; }
-
-        /// <summary>
-        /// Gets or sets a Function that gets passed a UserId and should return the according PartitionKey.
-        /// Leave this NULL if automatic partitioning is not used in the configured DocumentCollection.
-        /// </summary>
-        public Func<string, string> UserStorePartitionKeyGenerator { get; set; }
-
-        /// <summary>
-        /// Gets or sets a Function that gets passed a RoleId and should return the according PartitionKey.
-        /// Leave this NULL if automatic partitioning is not used in the configured DocumentCollection.
-        /// </summary>
-        public Func<string, string> RoleStorePartitionKeyGenerator { get; set; }
     }
 }

@@ -74,14 +74,11 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(user));
             }
 
-            // Deletes need the PartitionKey, so we add it if it was configured
-            RequestOptions requestOptions = GenerateRequestOptions(user.Id);
-
             Uri documentUri = UriFactory.CreateDocumentUri(options.Database, options.UserStoreDocumentCollection, user.Id);
 
             try
             {
-                await documentClient.DeleteDocumentAsync(documentUri, requestOptions);
+                await documentClient.DeleteDocumentAsync(documentUri);
             }
             catch (DocumentClientException dce)
             {
@@ -108,10 +105,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
             Uri documentUri = UriFactory.CreateDocumentUri(options.Database, options.UserStoreDocumentCollection, userId);
 
-            // Reading a single document needs the PartitionKey, so we add it if it was configured
-            RequestOptions requestOptions = GenerateRequestOptions(userId);
-
-            TUser foundUser = await documentClient.ReadDocumentAsync<TUser>(documentUri, requestOptions);
+            TUser foundUser = await documentClient.ReadDocumentAsync<TUser>(documentUri);
 
             return foundUser;
         }
@@ -700,13 +694,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             user.LockoutEnabled = enabled;
 
             return Task.CompletedTask;
-        }
-
-        private RequestOptions GenerateRequestOptions(string userId)
-        {
-            return options.UserStorePartitionKeyGenerator != null
-                ? new RequestOptions() { PartitionKey = new PartitionKey(options.UserStorePartitionKeyGenerator(userId)) }
-                : null;
         }
 
         #region IDisposable Support
