@@ -64,7 +64,7 @@ namespace IdentitySample
             })
                 .AddDocumentDbStores(options =>
                 {
-                    options.DocumentCollection = "AspNetIdentity";
+                    options.UserStoreDocumentCollection = "AspNetIdentity";
                     options.Database = "AspNetCoreIdentitySample";
                 })
                 .AddDefaultTokenProviders();

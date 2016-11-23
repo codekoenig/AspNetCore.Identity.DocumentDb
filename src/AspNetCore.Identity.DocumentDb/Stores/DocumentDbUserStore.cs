@@ -38,7 +38,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             this.options = options.Value;
             this.normalizer = normalizer;
 
-            collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.DocumentCollection);
+            collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.UserStoreDocumentCollection);
         }
 
         public async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken)
@@ -77,7 +77,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             // Deletes need the PartitionKey, so we add it if it was configured
             RequestOptions requestOptions = GenerateRequestOptions(user.Id);
 
-            Uri documentUri = UriFactory.CreateDocumentUri(options.Database, options.DocumentCollection, user.Id);
+            Uri documentUri = UriFactory.CreateDocumentUri(options.Database, options.UserStoreDocumentCollection, user.Id);
 
             try
             {
@@ -106,7 +106,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            Uri documentUri = UriFactory.CreateDocumentUri(options.Database, options.DocumentCollection, userId);
+            Uri documentUri = UriFactory.CreateDocumentUri(options.Database, options.UserStoreDocumentCollection, userId);
 
             // Reading a single document needs the PartitionKey, so we add it if it was configured
             RequestOptions requestOptions = GenerateRequestOptions(userId);
@@ -704,8 +704,8 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
         private RequestOptions GenerateRequestOptions(string userId)
         {
-            return options.PartitionKeyGenerator != null
-                ? new RequestOptions() { PartitionKey = new PartitionKey(options.PartitionKeyGenerator(userId)) }
+            return options.UserStorePartitionKeyGenerator != null
+                ? new RequestOptions() { PartitionKey = new PartitionKey(options.UserStorePartitionKeyGenerator(userId)) }
                 : null;
         }
 

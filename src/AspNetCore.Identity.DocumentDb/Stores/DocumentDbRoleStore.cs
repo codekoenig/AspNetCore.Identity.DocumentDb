@@ -25,7 +25,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             this.options = options.Value;
             this.normalizer = normalizer;
 
-            collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.DocumentCollection);
+            collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.UserStoreDocumentCollection);
         }
 
         public Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
