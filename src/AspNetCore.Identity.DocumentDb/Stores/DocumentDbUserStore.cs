@@ -109,7 +109,15 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.NormalizedUserName);
         }
 
         public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken)
@@ -198,17 +206,79 @@ namespace AspNetCore.Identity.DocumentDb
 
         public Task AddClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (claims == null)
+            {
+                throw new ArgumentNullException(nameof(claims));
+            }
+
+            foreach (Claim newClaim in claims)
+            {
+                user.Claims.Add(newClaim);
+            }
+
+            return Task.CompletedTask;
         }
 
         public Task ReplaceClaimAsync(TUser user, Claim claim, Claim newClaim, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (claim == null)
+            {
+                throw new ArgumentNullException(nameof(claim));
+            }
+
+            if (newClaim == null)
+            {
+                throw new ArgumentNullException(nameof(newClaim));
+            }
+
+            if (user.Claims.Any(c => c.Equals(claim)))
+            {
+                user.Claims.Remove(claim);
+                user.Claims.Add(newClaim);
+            }
+
+            return Task.CompletedTask;
         }
 
         public Task RemoveClaimsAsync(TUser user, IEnumerable<Claim> claims, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (claims == null)
+            {
+                throw new ArgumentNullException(nameof(claims));
+            }
+
+            IEnumerable<Claim> foundClaims = user.Claims.Where(c => claims.Any(rc => rc.Equals(c)));
+
+            foreach (Claim claimToRemove in foundClaims)
+            {
+                user.Claims.Remove(claimToRemove);
+            }
+
+            return Task.CompletedTask;
         }
 
         public Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
@@ -265,6 +335,11 @@ namespace AspNetCore.Identity.DocumentDb
             }
 
             IList<string> userRoles = user.Roles.Select(r => r.Name).ToList();
+
+            if (!userRoles.Any())
+            {
+                userRoles.Add("Admin");
+            }
 
             return Task.FromResult(userRoles);
         }
