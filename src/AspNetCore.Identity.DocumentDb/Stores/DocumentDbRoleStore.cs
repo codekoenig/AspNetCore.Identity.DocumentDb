@@ -18,7 +18,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         private DocumentDbOptions options;
         private ILookupNormalizer normalizer;
         private Uri collectionUri;
-        private RequestOptions requestOptions;
 
         public DocumentDbRoleStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer)
         {
@@ -27,11 +26,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             this.normalizer = normalizer;
 
             collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.DocumentCollection);
-
-            if (this.options.PartitionKey != null)
-            {
-                requestOptions = new RequestOptions() { PartitionKey = new PartitionKey(this.options.PartitionKey) };
-            }
         }
 
         public Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))

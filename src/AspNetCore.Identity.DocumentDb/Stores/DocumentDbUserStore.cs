@@ -31,7 +31,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         private DocumentDbOptions options;
         private ILookupNormalizer normalizer;
         private Uri collectionUri;
-        private RequestOptions requestOptions;
 
         public DocumentDbUserStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer)
         {
@@ -40,11 +39,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             this.normalizer = normalizer;
 
             collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.DocumentCollection);
-
-            if (this.options.PartitionKey != null)
-            {
-                requestOptions = new RequestOptions() { PartitionKey = new PartitionKey(this.options.PartitionKey) };
-            }
         }
 
         public async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken)
@@ -70,9 +64,36 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 : IdentityResult.Failed(new IdentityError() { Code = result.StatusCode.ToString() });
         }
 
-        public Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            // Deletes need the PartitionKey, so we add it if it was configured
+            RequestOptions requestOptions = GenerateRequestOptions(user.Id);
+
+            Uri documentUri = UriFactory.CreateDocumentUri(options.Database, options.DocumentCollection, user.Id);
+
+            try
+            {
+                await documentClient.DeleteDocumentAsync(documentUri, requestOptions);
+            }
+            catch (DocumentClientException dce)
+            {
+                if (dce.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return IdentityResult.Failed(new IdentityError() { Code = "UserNotFound", Description = "User not found" }); 
+                }
+
+                throw;
+            }
+
+            return IdentityResult.Success;
         }
 
         public async Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
@@ -85,7 +106,12 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            TUser foundUser = await documentClient.ReadDocumentAsync<TUser>(userId, this.options);
+            Uri documentUri = UriFactory.CreateDocumentUri(options.Database, options.DocumentCollection, userId);
+
+            // Reading a single document needs the PartitionKey, so we add it if it was configured
+            RequestOptions requestOptions = GenerateRequestOptions(userId);
+
+            TUser foundUser = await documentClient.ReadDocumentAsync<TUser>(documentUri, requestOptions);
 
             return foundUser;
         }
@@ -336,11 +362,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             }
 
             IList<string> userRoles = user.Roles.Select(r => r.Name).ToList();
-
-            if (!userRoles.Any())
-            {
-                userRoles.Add("Admin");
-            }
 
             return Task.FromResult(userRoles);
         }
@@ -679,6 +700,13 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             user.LockoutEnabled = enabled;
 
             return Task.CompletedTask;
+        }
+
+        private RequestOptions GenerateRequestOptions(string userId)
+        {
+            return options.PartitionKeyGenerator != null
+                ? new RequestOptions() { PartitionKey = new PartitionKey(options.PartitionKeyGenerator(userId)) }
+                : null;
         }
 
         #region IDisposable Support
