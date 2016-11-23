@@ -11,9 +11,10 @@ using Microsoft.Azure.Documents;
 using System.Net;
 using AspNetCore.Identity.DocumentDb.Extensions;
 
-namespace AspNetCore.Identity.DocumentDb
+namespace AspNetCore.Identity.DocumentDb.Stores
 {
     public class DocumentDbUserStore<TUser> :
+        StoreBase,
         IUserStore<TUser>,
         IUserClaimStore<TUser>,
         IUserLoginStore<TUser>,
@@ -680,17 +681,7 @@ namespace AspNetCore.Identity.DocumentDb
             return Task.CompletedTask;
         }
 
-        private void ThrowIfDisposed()
-        {
-            if (disposed)
-            {
-                throw new ObjectDisposedException(GetType().Name);
-            }
-        }
-
         #region IDisposable Support
-
-        private bool disposed = false;
 
         public void Dispose()
         {

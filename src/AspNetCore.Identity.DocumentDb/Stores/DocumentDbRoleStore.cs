@@ -9,9 +9,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.Azure.Documents;
 using System.Security.Claims;
 
-namespace AspNetCore.Identity.DocumentDb
+namespace AspNetCore.Identity.DocumentDb.Stores
 {
-    public class DocumentDbRoleStore<TRole> : IRoleClaimStore<TRole>
+    public class DocumentDbRoleStore<TRole> : StoreBase, IRoleClaimStore<TRole>
         where TRole : DocumentDbIdentityRole
     {
         private DocumentClient documentClient;
@@ -100,8 +100,6 @@ namespace AspNetCore.Identity.DocumentDb
         }
 
         #region IDisposable Support
-
-        private bool disposed = false;
 
         public void Dispose()
         {
