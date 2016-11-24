@@ -25,7 +25,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         IUserPhoneNumberStore<TUser>,
         IUserEmailStore<TUser>,
         IUserLockoutStore<TUser>
-        where TUser: DocumentDbIdentityUser
+        where TUser : DocumentDbIdentityUser
     {
         private DocumentClient documentClient;
         private DocumentDbOptions options;
@@ -59,8 +59,8 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
             var result = await documentClient.CreateDocumentAsync(collectionUri, user);
 
-            return result.StatusCode == HttpStatusCode.Created 
-                ? IdentityResult.Success 
+            return result.StatusCode == HttpStatusCode.Created
+                ? IdentityResult.Success
                 : IdentityResult.Failed(new IdentityError() { Code = result.StatusCode.ToString() });
         }
 
@@ -74,17 +74,15 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(user));
             }
 
-            Uri documentUri = UriFactory.CreateDocumentUri(options.Database, options.UserStoreDocumentCollection, user.Id);
-
             try
             {
-                await documentClient.DeleteDocumentAsync(documentUri);
+                await documentClient.DeleteDocumentAsync(GenerateUserDocumentUri(user.Id));
             }
             catch (DocumentClientException dce)
             {
                 if (dce.StatusCode == HttpStatusCode.NotFound)
                 {
-                    return IdentityResult.Failed(new IdentityError() { Code = "UserNotFound", Description = "User not found" }); 
+                    return IdentityResult.Failed();
                 }
 
                 throw;
@@ -103,9 +101,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            Uri documentUri = UriFactory.CreateDocumentUri(options.Database, options.UserStoreDocumentCollection, userId);
-
-            TUser foundUser = await documentClient.ReadDocumentAsync<TUser>(documentUri);
+            TUser foundUser = await documentClient.ReadDocumentAsync<TUser>(GenerateUserDocumentUri(userId));
 
             return foundUser;
         }
@@ -207,9 +203,31 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             return Task.CompletedTask;
         }
 
-        public Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            try
+            {
+                await documentClient.ReplaceDocumentAsync(GenerateUserDocumentUri(user.Id), document: user);
+            }
+            catch (DocumentClientException dce)
+            {
+                if (dce.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return IdentityResult.Failed();
+                }
+
+                throw;
+            }
+
+            return IdentityResult.Success;
         }
 
         public Task<IList<Claim>> GetClaimsAsync(TUser user, CancellationToken cancellationToken)
@@ -309,12 +327,52 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
         public Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (login == null)
+            {
+                throw new ArgumentNullException(nameof(login));
+            }
+
+            user.Logins.Add(login);
+
+            return Task.CompletedTask;
         }
 
         public Task RemoveLoginAsync(TUser user, string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (loginProvider == null)
+            {
+                throw new ArgumentNullException(nameof(loginProvider));
+            }
+
+            if (providerKey == null)
+            {
+                throw new ArgumentNullException(nameof(providerKey));
+            }
+
+            UserLoginInfo userLoginToRemove = user.Logins.FirstOrDefault(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey);
+
+            if (userLoginToRemove != null)
+            {
+                user.Logins.Remove(userLoginToRemove);
+            }
+
+            return Task.CompletedTask;
         }
 
         public Task<IList<UserLoginInfo>> GetLoginsAsync(TUser user, CancellationToken cancellationToken)
@@ -613,7 +671,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             }
 
             user.NormalizedEmail = normalizedEmail;
-            
+
             return Task.FromResult(user.Email);
         }
 
@@ -694,6 +752,11 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             user.LockoutEnabled = enabled;
 
             return Task.CompletedTask;
+        }
+
+        private Uri GenerateUserDocumentUri(string userId)
+        {
+            return UriFactory.CreateDocumentUri(options.Database, options.UserStoreDocumentCollection, userId);
         }
 
         #region IDisposable Support
