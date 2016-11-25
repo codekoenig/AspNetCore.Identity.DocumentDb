@@ -1,7 +1,9 @@
 ﻿using AspNetCore.Identity.DocumentDb.Stores;
+using AspNetCore.Identity.DocumentDb.Tools;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +20,15 @@ namespace AspNetCore.Identity.DocumentDb
 
         public static IdentityBuilder AddDocumentDbStores(this IdentityBuilder builder, Action<DocumentDbOptions> setupAction)
         {
+            // TODO: Until DocumentDB SDK exposes it's JSON.NET settings, we need to hijack the global settings to serialize claims
+            JsonConvert.DefaultSettings = () =>
+            {
+                return new JsonSerializerSettings()
+                {
+                    Converters = new List<JsonConverter>() { new JsonClaimConverter() }
+                };
+            };
+
             if (setupAction != null)
             {
                 builder.Services.Configure(setupAction);

@@ -9,7 +9,7 @@ using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Options;
 using Microsoft.Azure.Documents;
 using System.Net;
-using AspNetCore.Identity.DocumentDb.Extensions;
+using AspNetCore.Identity.DocumentDb.Tools;
 
 namespace AspNetCore.Identity.DocumentDb.Stores
 {
@@ -322,7 +322,21 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
         public Task<IList<TUser>> GetUsersForClaimAsync(Claim claim, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (claim == null)
+            {
+                throw new ArgumentNullException(nameof(claim));
+            }
+
+            var result = documentClient.CreateDocumentQuery<TUser>(collectionUri)
+                .SelectMany(u => u.Claims
+                    .Where(c => c.Type == claim.Type && c.Value == claim.Value)
+                    .Select(c => u)
+                ).ToList();
+
+            return Task.FromResult<IList<TUser>>(result);
         }
 
         public Task AddLoginAsync(TUser user, UserLoginInfo login, CancellationToken cancellationToken)
