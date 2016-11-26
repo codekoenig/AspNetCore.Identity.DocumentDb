@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -20,8 +21,16 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             return builder.identityUser;
         }
 
-        public static DocumentDbIdentityUserBuilder Create(string userName)
+        public static DocumentDbIdentityUserBuilder Create(string userName = null)
         {
+            string email = userName;
+
+            if (userName == null)
+            {
+                userName = Guid.NewGuid().ToString();
+                email = userName + "@test.at";
+            }
+
             return new DocumentDbIdentityUserBuilder(new DocumentDbIdentityUser()
             {
                 UserName = userName,
@@ -86,6 +95,58 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             claims.Add(new Claim(ClaimTypes.Role, "Admin"));
 
             identityUser.Claims = claims;
+            return this;
+        }
+
+        public DocumentDbIdentityUserBuilder WithUserRole()
+        {
+            List<DocumentDbIdentityRole> roles = new List<DocumentDbIdentityRole>();
+
+            roles.Add(new DocumentDbIdentityRole() { Name = "User" });
+            roles.Add(new DocumentDbIdentityRole() { Name = "Generic" });
+
+            identityUser.Roles = roles;
+            return this;
+        }
+
+        public DocumentDbIdentityUserBuilder WithAdminRole()
+        {
+            List<DocumentDbIdentityRole> roles = new List<DocumentDbIdentityRole>();
+
+            roles.Add(new DocumentDbIdentityRole() { Name = "Admin" });
+            roles.Add(new DocumentDbIdentityRole() { Name = "Generic" });
+
+            identityUser.Roles = roles;
+            return this;
+        }
+
+        public DocumentDbIdentityUserBuilder WithNormalizedEmail()
+        {
+            LookupNormalizer normalizer = new LookupNormalizer();
+
+            identityUser.NormalizedEmail =  normalizer.Normalize(identityUser.Email);
+            return this;
+        }
+
+        public DocumentDbIdentityUserBuilder WithUserLoginInfo(int amount = 1)
+        {
+            List<UserLoginInfo> logins = new List<UserLoginInfo>();
+
+            for (int i = 0; i < amount; i++)
+            {
+                logins.Add(new UserLoginInfo(
+                    Guid.NewGuid().ToString(), 
+                    Guid.NewGuid().ToString(), 
+                    Guid.NewGuid().ToString()));
+            }
+
+            this.identityUser.Logins = logins;
+            return this;
+        }
+
+        public DocumentDbIdentityUserBuilder WithAccessFailedCountOf(int count)
+        {
+            this.identityUser.AccessFailedCount = count;
             return this;
         }
     }

@@ -404,16 +404,37 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
         public Task<TUser> FindByLoginAsync(string loginProvider, string providerKey, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (loginProvider == null)
+            {
+                throw new ArgumentNullException(nameof(loginProvider));
+            }
+
+            if (loginProvider == null)
+            {
+                throw new ArgumentNullException(nameof(loginProvider));
+            }
+
+            TUser user = documentClient.CreateDocumentQuery<TUser>(collectionUri)
+                .SelectMany(u => u.Logins
+                    .Where(l => l.LoginProvider == loginProvider && l.ProviderKey == providerKey)
+                    .Select(l => u)
+                ).AsEnumerable().FirstOrDefault();
+
+            return Task.FromResult(user);
         }
 
         public Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
+            // TODO: Requires implemented role store so we can check if the passed roleName is valid
             throw new NotImplementedException();
         }
 
         public Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
+            // TODO: See AddToRoleAsync
             throw new NotImplementedException();
         }
 
@@ -434,12 +455,41 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
         public Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (roleName == null)
+            {
+                throw new ArgumentNullException(nameof(roleName));
+            }
+
+            bool isInRole = user.Roles.Any(r => r.Name.Equals(roleName));
+
+            return Task.FromResult(isInRole);
         }
 
         public Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (roleName == null)
+            {
+                throw new ArgumentNullException(nameof(roleName));
+            }
+
+            var result = documentClient.CreateDocumentQuery<TUser>(collectionUri)
+                .SelectMany(u => u.Roles
+                    .Where(r => r.Name == roleName)
+                    .Select(r => u)
+                ).ToList();
+
+            return Task.FromResult<IList<TUser>>(result);
         }
 
         public Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken)
@@ -658,7 +708,20 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
         public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (normalizedEmail == null)
+            {
+                throw new ArgumentNullException(nameof(normalizedEmail));
+            }
+
+            TUser user = documentClient.CreateDocumentQuery<TUser>(collectionUri)
+                .Where(u => u.NormalizedEmail == normalizedEmail)
+                .AsEnumerable()
+                .FirstOrDefault();
+
+            return Task.FromResult(user);
         }
 
         public Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken)
@@ -719,12 +782,32 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
         public Task<int> IncrementAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user.AccessFailedCount++;
+
+            return Task.FromResult(user.AccessFailedCount);
         }
 
         public Task ResetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user.AccessFailedCount = 0;
+
+            return Task.CompletedTask;
         }
 
         public Task<int> GetAccessFailedCountAsync(TUser user, CancellationToken cancellationToken)

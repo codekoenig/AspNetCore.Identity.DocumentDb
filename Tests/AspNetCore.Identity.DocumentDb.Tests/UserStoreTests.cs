@@ -1,4 +1,5 @@
 ﻿using AspNetCore.Identity.DocumentDb.Stores;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Azure.Documents;
 using Microsoft.Extensions.Options;
 using System;
@@ -39,28 +40,140 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         {
             DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
 
-            string firstAdminEmail = "adminabcdefg@test.at";
-            string secondAdminEmail = "admin1234567@test.at";
-            string thirdAdminEmail = "admin349jfja@test.at";
+            DocumentDbIdentityUser firstAdmin = DocumentDbIdentityUserBuilder.Create().WithId().WithAdminRoleClaim();
+            DocumentDbIdentityUser secondAdmin = DocumentDbIdentityUserBuilder.Create().WithId().WithAdminRoleClaim();
+            DocumentDbIdentityUser thirdAdmin = DocumentDbIdentityUserBuilder.Create().WithId().WithAdminRoleClaim();
 
-            CreateUser(DocumentDbIdentityUserBuilder.Create(firstAdminEmail).WithAdminRoleClaim());
-            CreateUser(DocumentDbIdentityUserBuilder.Create(secondAdminEmail).WithAdminRoleClaim());
-            CreateUser(DocumentDbIdentityUserBuilder.Create("userasdfasdf@test.at").WithUserRoleClaim());
-            CreateUser(DocumentDbIdentityUserBuilder.Create("user435fdfgg@test.at").WithUserRoleClaim());
-            CreateUser(DocumentDbIdentityUserBuilder.Create("usergfdghdfg@test.at").WithUserRoleClaim());
-            CreateUser(DocumentDbIdentityUserBuilder.Create("usernggdfs66@test.at").WithUserRoleClaim());
-            CreateUser(DocumentDbIdentityUserBuilder.Create("userbklasdkj@test.at").WithUserRoleClaim());
-            CreateUser(DocumentDbIdentityUserBuilder.Create(thirdAdminEmail).WithAdminRoleClaim());
+            CreateUser(firstAdmin);
+            CreateUser(secondAdmin);
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRoleClaim());
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRoleClaim());
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRoleClaim());
+            CreateUser(thirdAdmin);
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRoleClaim());
 
             IList<DocumentDbIdentityUser> adminUsers = store.GetUsersForClaimAsync(new Claim(ClaimTypes.Role, "Admin"), CancellationToken.None).Result;
             
             Assert.Collection(
                 adminUsers,
-                u => u.Email.Equals(firstAdminEmail),
-                u => u.Email.Equals(secondAdminEmail),
-                u => u.Email.Equals(thirdAdminEmail));
+                u => u.Id.Equals(firstAdmin.Id),
+                u => u.Id.Equals(secondAdmin.Id),
+                u => u.Id.Equals(thirdAdmin.Id));
 
             CleanupUsers();
+        }
+
+        [Fact]
+        public void ShouldReturnUserByLoginProvider()
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithUserLoginInfo(amount: 3);
+            UserLoginInfo targetLogin = targetUser.Logins[1];
+
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithId().WithUserLoginInfo(amount: 2));
+            CreateUser(targetUser);
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithId().WithUserLoginInfo(amount: 2));
+
+            DocumentDbIdentityUser foundUser = store.FindByLoginAsync(targetLogin.LoginProvider, targetLogin.ProviderKey, CancellationToken.None).Result;
+
+            Assert.Equal(targetUser.Id, foundUser.Id);
+
+            CleanupUsers();
+        }
+
+        [Fact]
+        public void ShouldReturnUserIsInRole()
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbIdentityUser user = DocumentDbIdentityUserBuilder.Create().WithId().WithAdminRole();
+
+            bool result = store.IsInRoleAsync(user, "Admin", CancellationToken.None).Result;
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void ShouldReturnUserIsNotInRole()
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbIdentityUser user = DocumentDbIdentityUserBuilder.Create().WithId().WithUserRole();
+
+            bool result = store.IsInRoleAsync(user, "Admin", CancellationToken.None).Result;
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ShouldReturnAllUsersWithAdminRole()
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+
+            DocumentDbIdentityUser firstAdmin = DocumentDbIdentityUserBuilder.Create().WithId().WithAdminRole();
+            DocumentDbIdentityUser secondAdmin = DocumentDbIdentityUserBuilder.Create().WithId().WithAdminRole();
+            DocumentDbIdentityUser thirdAdmin = DocumentDbIdentityUserBuilder.Create().WithId().WithAdminRole();
+
+            CreateUser(firstAdmin);
+            CreateUser(secondAdmin);
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRole());
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRole());
+            CreateUser(thirdAdmin);
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRole());
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRole());
+
+            IList<DocumentDbIdentityUser> adminUsers = store.GetUsersInRoleAsync("Admin", CancellationToken.None).Result;
+
+            Assert.Collection(
+                adminUsers,
+                u => u.Id.Equals(firstAdmin.Id),
+                u => u.Id.Equals(secondAdmin.Id),
+                u => u.Id.Equals(thirdAdmin.Id));
+
+            CleanupUsers();
+        }
+
+        [Fact]
+        public void ShouldReturnUserBySpecificEmail()
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail();
+
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRole());
+            CreateUser(targetUser);
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRole());
+            CreateUser(DocumentDbIdentityUserBuilder.Create().WithUserRole());
+
+            DocumentDbIdentityUser foundUser = store.FindByEmailAsync(targetUser.NormalizedEmail, CancellationToken.None).Result;
+
+            Assert.Equal(targetUser.Id, foundUser.Id);
+
+            CleanupUsers();
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(5)]
+        public void ShouldIncreaseAccessFailedCountBy1(int accessFailedCount)
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithAccessFailedCountOf(accessFailedCount);
+
+            store.IncrementAccessFailedCountAsync(targetUser, CancellationToken.None);
+
+            Assert.Equal(++accessFailedCount, targetUser.AccessFailedCount);
+        }
+
+        [Theory]
+        [InlineData(5)]
+        [InlineData(1)]
+        [InlineData(0)]
+        public void ShouldResetAccessFailedCountToZero(int accessFailedCount)
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithAccessFailedCountOf(accessFailedCount);
+
+            store.ResetAccessFailedCountAsync(targetUser, CancellationToken.None);
+
+            Assert.Equal(0, targetUser.AccessFailedCount);
         }
 
         private DocumentDbUserStore<DocumentDbIdentityUser> InitializeDocumentDbUserStore()

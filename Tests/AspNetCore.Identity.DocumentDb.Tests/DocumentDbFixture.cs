@@ -48,6 +48,8 @@ namespace AspNetCore.Identity.DocumentDb.Tests
 
         private void CreateTestDatabase()
         {
+            CleanupTestDatabase();
+
             Database db = this.Client.CreateDatabaseAsync(new Database() { Id = this.Database }).Result;
 
             DocumentCollection userCollection = this.Client.CreateDocumentCollectionAsync(
@@ -64,7 +66,17 @@ namespace AspNetCore.Identity.DocumentDb.Tests
 
         private void CleanupTestDatabase()
         {
-            this.Client.DeleteDatabaseAsync(DatabaseLink);
+            try
+            {
+                var existingDb = this.Client.ReadDatabaseAsync(this.DatabaseLink).Result;
+            }
+            catch (Exception)
+            {
+                // Suppose DB does not exist (anymore)
+                return;
+            }
+
+            var db = this.Client.DeleteDatabaseAsync(this.DatabaseLink).Result;
         }
 
         public void Dispose()
