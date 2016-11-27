@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.DocumentDb
 {
-    public abstract class DocumentDbIdentityDocument
+    public abstract class DocumentBase
     {
         [JsonProperty(PropertyName = "documentType")]
         public virtual string DocumentType

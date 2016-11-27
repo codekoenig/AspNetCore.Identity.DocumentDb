@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Azure.Documents;
 using Newtonsoft.Json;
 using AspNetCore.Identity.DocumentDb.Tools;
+using Xunit;
 
 namespace AspNetCore.Identity.DocumentDb.Tests
 {

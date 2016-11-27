@@ -8,24 +8,18 @@ using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Options;
 using Microsoft.Azure.Documents;
 using System.Security.Claims;
+using System.Net;
+using AspNetCore.Identity.DocumentDb.Tools;
 
 namespace AspNetCore.Identity.DocumentDb.Stores
 {
     public class DocumentDbRoleStore<TRole> : StoreBase, IRoleClaimStore<TRole>
         where TRole : DocumentDbIdentityRole
     {
-        private DocumentClient documentClient;
-        private DocumentDbOptions options;
-        private ILookupNormalizer normalizer;
-        private Uri collectionUri;
-
-        public DocumentDbRoleStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer)
+        public DocumentDbRoleStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer) 
+            : base(documentClient, options, normalizer, options.Value.RoleStoreDocumentCollection)
         {
-            this.documentClient = documentClient;
-            this.options = options.Value;
-            this.normalizer = normalizer;
-
-            collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.UserStoreDocumentCollection);
+            collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.RoleStoreDocumentCollection);
         }
 
         public Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))
@@ -43,14 +37,54 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             throw new NotImplementedException();
         }
 
-        public Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> CreateAsync(TRole role, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+
+            // If no RoleId was specified, generate one
+            if (role.Id == null)
+            {
+                role.Id = Guid.NewGuid().ToString();
+            }
+
+            ResourceResponse<Document> result = await documentClient.CreateDocumentAsync(collectionUri, role);
+
+            return result.StatusCode == HttpStatusCode.Created
+                ? IdentityResult.Success
+                : IdentityResult.Failed(new IdentityError() { Code = result.StatusCode.ToString() });
         }
 
-        public Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(TRole role, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (role == null)
+            {
+                throw new ArgumentNullException(nameof(role));
+            }
+
+            try
+            {
+                ResourceResponse<Document> result = await documentClient.ReplaceDocumentAsync(GenerateDocumentUri(role.Id), document: role);
+            }
+            catch (DocumentClientException dce)
+            {
+                if (dce.StatusCode == HttpStatusCode.NotFound)
+                {
+                    return IdentityResult.Failed();
+                }
+
+                throw;
+            }
+
+            return IdentityResult.Success;
         }
 
         public Task<IdentityResult> DeleteAsync(TRole role, CancellationToken cancellationToken)
@@ -83,14 +117,37 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             throw new NotImplementedException();
         }
 
-        public Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
+        public async Task<TRole> FindByIdAsync(string roleId, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (roleId == null)
+            {
+                throw new ArgumentNullException(nameof(roleId));
+            }
+
+            TRole role = await documentClient.ReadDocumentAsync<TRole>(GenerateDocumentUri(roleId));
+
+            return role;
         }
 
         public Task<TRole> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (normalizedRoleName == null)
+            {
+                throw new ArgumentNullException(nameof(normalizedRoleName));
+            }
+
+            TRole role = documentClient.CreateDocumentQuery<TRole>(collectionUri)
+                .Where(r => r.NormalizedName == normalizedRoleName)
+                .AsEnumerable()
+                .FirstOrDefault();
+
+            return Task.FromResult(role);
         }
 
         #region IDisposable Support

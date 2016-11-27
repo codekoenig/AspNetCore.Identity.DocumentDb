@@ -27,18 +27,9 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         IUserLockoutStore<TUser>
         where TUser : DocumentDbIdentityUser
     {
-        private DocumentClient documentClient;
-        private DocumentDbOptions options;
-        private ILookupNormalizer normalizer;
-        private Uri collectionUri;
-
         public DocumentDbUserStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer)
+            : base(documentClient, options, normalizer, options.Value.UserStoreDocumentCollection)
         {
-            this.documentClient = documentClient;
-            this.options = options.Value;
-            this.normalizer = normalizer;
-
-            collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.UserStoreDocumentCollection);
         }
 
         public async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken)
@@ -57,7 +48,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 user.Id = Guid.NewGuid().ToString();
             }
 
-            var result = await documentClient.CreateDocumentAsync(collectionUri, user);
+            ResourceResponse<Document> result = await documentClient.CreateDocumentAsync(collectionUri, user);
 
             return result.StatusCode == HttpStatusCode.Created
                 ? IdentityResult.Success
@@ -76,7 +67,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
             try
             {
-                await documentClient.DeleteDocumentAsync(GenerateUserDocumentUri(user.Id));
+                await documentClient.DeleteDocumentAsync(GenerateDocumentUri(user.Id));
             }
             catch (DocumentClientException dce)
             {
@@ -101,7 +92,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(userId));
             }
 
-            TUser foundUser = await documentClient.ReadDocumentAsync<TUser>(GenerateUserDocumentUri(userId));
+            TUser foundUser = await documentClient.ReadDocumentAsync<TUser>(GenerateDocumentUri(userId));
 
             return foundUser;
         }
@@ -215,7 +206,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
             try
             {
-                await documentClient.ReplaceDocumentAsync(GenerateUserDocumentUri(user.Id), document: user);
+                await documentClient.ReplaceDocumentAsync(GenerateDocumentUri(user.Id), document: user);
             }
             catch (DocumentClientException dce)
             {
@@ -849,11 +840,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             user.LockoutEnabled = enabled;
 
             return Task.CompletedTask;
-        }
-
-        private Uri GenerateUserDocumentUri(string userId)
-        {
-            return UriFactory.CreateDocumentUri(options.Database, options.UserStoreDocumentCollection, userId);
         }
 
         #region IDisposable Support

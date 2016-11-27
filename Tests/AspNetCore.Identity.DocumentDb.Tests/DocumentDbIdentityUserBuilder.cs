@@ -64,59 +64,26 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             return this;
         }
 
-        public DocumentDbIdentityUserBuilder WithClaims(List<Claim> claims = null)
+        public DocumentDbIdentityUserBuilder AddClaim(string type = null, string value = null)
         {
-            if (claims == null || !claims.Any())
-            {
-                claims = new List<Claim>();
+            Claim claim = new Claim(type ?? Guid.NewGuid().ToString(), value ?? Guid.NewGuid().ToString());
+            identityUser.Claims.Add(claim);
 
-                claims.Add(new Claim(ClaimTypes.Email, identityUser.Email));
-                claims.Add(new Claim(ClaimTypes.Gender, "Female"));
-                claims.Add(new Claim(ClaimTypes.Country, "USA"));
-                claims.Add(new Claim(ClaimTypes.Role, "User"));
+            return this;
+        }
+
+        public DocumentDbIdentityUserBuilder AddRole(DocumentDbIdentityRole role = null)
+        {
+            if (role == null)
+            {
+                role = new DocumentDbIdentityRole()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = Guid.NewGuid().ToString()
+                };
             }
 
-            identityUser.Claims = claims;
-            return this;
-        }
-
-        public DocumentDbIdentityUserBuilder WithUserRoleClaim()
-        {
-            return WithClaims(null);
-        }
-
-        public DocumentDbIdentityUserBuilder WithAdminRoleClaim()
-        {
-            List<Claim> claims = new List<Claim>();
-
-            claims.Add(new Claim(ClaimTypes.Email, identityUser.Email));
-            claims.Add(new Claim(ClaimTypes.Gender, "Male"));
-            claims.Add(new Claim(ClaimTypes.Country, "Austria"));
-            claims.Add(new Claim(ClaimTypes.Role, "Admin"));
-
-            identityUser.Claims = claims;
-            return this;
-        }
-
-        public DocumentDbIdentityUserBuilder WithUserRole()
-        {
-            List<DocumentDbIdentityRole> roles = new List<DocumentDbIdentityRole>();
-
-            roles.Add(new DocumentDbIdentityRole() { Name = "User" });
-            roles.Add(new DocumentDbIdentityRole() { Name = "Generic" });
-
-            identityUser.Roles = roles;
-            return this;
-        }
-
-        public DocumentDbIdentityUserBuilder WithAdminRole()
-        {
-            List<DocumentDbIdentityRole> roles = new List<DocumentDbIdentityRole>();
-
-            roles.Add(new DocumentDbIdentityRole() { Name = "Admin" });
-            roles.Add(new DocumentDbIdentityRole() { Name = "Generic" });
-
-            identityUser.Roles = roles;
+            identityUser.Roles.Add(role);
             return this;
         }
 

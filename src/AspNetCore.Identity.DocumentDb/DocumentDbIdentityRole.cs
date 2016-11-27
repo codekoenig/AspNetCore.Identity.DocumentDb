@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.DocumentDb
 {
-    public class DocumentDbIdentityRole : DocumentDbIdentityDocument
+    public class DocumentDbIdentityRole : DocumentBase
     {
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
