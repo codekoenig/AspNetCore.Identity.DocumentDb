@@ -5,7 +5,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace AspNetCore.Identity.DocumentDb.Tests
+namespace AspNetCore.Identity.DocumentDb.Tests.Builder
 {
     public class DocumentDbIdentityUserBuilder
     {

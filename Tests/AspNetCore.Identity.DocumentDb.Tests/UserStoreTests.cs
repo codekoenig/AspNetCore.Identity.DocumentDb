@@ -1,4 +1,6 @@
 ﻿using AspNetCore.Identity.DocumentDb.Stores;
+using AspNetCore.Identity.DocumentDb.Tests.Builder;
+using AspNetCore.Identity.DocumentDb.Tests.Fixtures;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;

@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 using AspNetCore.Identity.DocumentDb.Tools;
 using Xunit;
 
-namespace AspNetCore.Identity.DocumentDb.Tests
+namespace AspNetCore.Identity.DocumentDb.Tests.Fixtures
 {
     public class DocumentDbFixture : IDisposable
     {
