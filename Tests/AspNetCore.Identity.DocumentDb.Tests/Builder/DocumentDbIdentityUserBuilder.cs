@@ -44,9 +44,11 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
             return this;
         }
 
-        public DocumentDbIdentityUserBuilder WithNormalizedUserName(string normalizedUserName = null)
+        public DocumentDbIdentityUserBuilder WithNormalizedUserName()
         {
-            identityUser.NormalizedUserName = normalizedUserName ?? "unittestuser@test.at";
+            LookupNormalizer normalizer = new LookupNormalizer();
+
+            identityUser.NormalizedUserName = normalizer.Normalize(identityUser.UserName);
             return this;
         }
 

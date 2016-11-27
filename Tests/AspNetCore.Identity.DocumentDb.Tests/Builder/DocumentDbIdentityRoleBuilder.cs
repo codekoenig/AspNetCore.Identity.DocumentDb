@@ -47,5 +47,25 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
             identityRole.NormalizedName = normalizedRoleName ?? normalizer.Normalize(identityRole.Name);
             return this;
         }
+
+        public DocumentDbIdentityRoleBuilder AddClaim(string type, string value = null)
+        {
+            Claim claim = new Claim(type ?? Guid.NewGuid().ToString(), value ?? Guid.NewGuid().ToString());
+            identityRole.Claims.Add(claim);
+
+            return this;
+        }
+
+        public DocumentDbIdentityRoleBuilder AddClaim(Claim claim = null)
+        {
+            if (claim == null)
+            {
+                claim = new Claim(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+            }
+
+            identityRole.Claims.Add(claim);
+
+            return this;
+        }
     }
 }

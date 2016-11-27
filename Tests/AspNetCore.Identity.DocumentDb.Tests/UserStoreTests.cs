@@ -25,20 +25,19 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         }
 
         [Fact]
-        public void ShouldReturnNormalizedUserName()
+        public async Task ShouldSetNormalizedUserName()
         {
-            DocumentDbIdentityUser user = DocumentDbIdentityUserBuilder.Create("test@test.at").WithNormalizedUserName();
+            DocumentDbIdentityUser user = DocumentDbIdentityUserBuilder.Create().WithNormalizedUserName();
             DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
 
-            string normalizedUserName = "normalized@test.at";
-
-            store.SetNormalizedUserNameAsync(user, normalizedUserName, CancellationToken.None);
+            string normalizedUserName = Guid.NewGuid().ToString();
+            await store.SetNormalizedUserNameAsync(user, normalizedUserName, CancellationToken.None);
 
             Assert.Equal(normalizedUserName, user.NormalizedUserName);
         }
 
         [Fact]
-        public void ShouldReturnAllUsersWithAdminRoleClaim()
+        public async Task ShouldReturnAllUsersWithAdminRoleClaim()
         {
             DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
 
@@ -56,7 +55,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             CreateDocument(thirdAdmin);
             CreateDocument(DocumentDbIdentityUserBuilder.Create().AddClaim().AddClaim().AddClaim().AddClaim());
 
-            IList<DocumentDbIdentityUser> adminUsers = store.GetUsersForClaimAsync(new Claim(ClaimTypes.Role, adminRoleValue), CancellationToken.None).Result;
+            IList<DocumentDbIdentityUser> adminUsers = await store.GetUsersForClaimAsync(new Claim(ClaimTypes.Role, adminRoleValue), CancellationToken.None);
             
             Assert.Collection(
                 adminUsers,
@@ -66,7 +65,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         }
 
         [Fact]
-        public void ShouldReturnUserByLoginProvider()
+        public async Task ShouldReturnUserByLoginProvider()
         {
             DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithUserLoginInfo(amount: 3);
@@ -76,37 +75,37 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             CreateDocument(targetUser);
             CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithUserLoginInfo(amount: 2));
 
-            DocumentDbIdentityUser foundUser = store.FindByLoginAsync(targetLogin.LoginProvider, targetLogin.ProviderKey, CancellationToken.None).Result;
+            DocumentDbIdentityUser foundUser = await store.FindByLoginAsync(targetLogin.LoginProvider, targetLogin.ProviderKey, CancellationToken.None);
 
             Assert.Equal(targetUser.Id, foundUser.Id);
         }
 
         [Fact]
-        public void ShouldReturnUserIsInRole()
+        public async Task ShouldReturnUserIsInRole()
         {
             DocumentDbIdentityRole role = DocumentDbIdentityRoleBuilder.Create();
 
             DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser user = DocumentDbIdentityUserBuilder.Create().WithId().AddRole(role).AddRole().AddRole();
 
-            bool result = store.IsInRoleAsync(user, role.Name, CancellationToken.None).Result;
+            bool result = await store.IsInRoleAsync(user, role.Name, CancellationToken.None);
 
             Assert.True(result);
         }
 
         [Fact]
-        public void ShouldReturnUserIsNotInRole()
+        public async Task ShouldReturnUserIsNotInRole()
         {
             DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser user = DocumentDbIdentityUserBuilder.Create().WithId().AddRole().AddRole();
 
-            bool result = store.IsInRoleAsync(user, Guid.NewGuid().ToString(), CancellationToken.None).Result;
+            bool result = await store.IsInRoleAsync(user, Guid.NewGuid().ToString(), CancellationToken.None);
 
             Assert.False(result);
         }
 
         [Fact]
-        public void ShouldReturnAllUsersWithAdminRole()
+        public async Task ShouldReturnAllUsersWithAdminRole()
         {
             DocumentDbIdentityRole role = DocumentDbIdentityRoleBuilder.Create();
 
@@ -124,7 +123,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             CreateDocument(DocumentDbIdentityUserBuilder.Create());
             CreateDocument(DocumentDbIdentityUserBuilder.Create().AddRole());
 
-            IList<DocumentDbIdentityUser> adminUsers = store.GetUsersInRoleAsync(role.Name, CancellationToken.None).Result;
+            IList<DocumentDbIdentityUser> adminUsers = await store.GetUsersInRoleAsync(role.Name, CancellationToken.None);
 
             Assert.Collection(
                 adminUsers,
@@ -134,7 +133,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         }
 
         [Fact]
-        public void ShouldReturnUserBySpecificEmail()
+        public async Task ShouldReturnUserBySpecificEmail()
         {
             DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail();
@@ -144,7 +143,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             CreateDocument(DocumentDbIdentityUserBuilder.Create());
             CreateDocument(DocumentDbIdentityUserBuilder.Create());
 
-            DocumentDbIdentityUser foundUser = store.FindByEmailAsync(targetUser.NormalizedEmail, CancellationToken.None).Result;
+            DocumentDbIdentityUser foundUser = await store.FindByEmailAsync(targetUser.NormalizedEmail, CancellationToken.None);
 
             Assert.Equal(targetUser.Id, foundUser.Id);
         }
@@ -152,12 +151,12 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(5)]
-        public void ShouldIncreaseAccessFailedCountBy1(int accessFailedCount)
+        public async Task ShouldIncreaseAccessFailedCountBy1(int accessFailedCount)
         {
             DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithAccessFailedCountOf(accessFailedCount);
 
-            store.IncrementAccessFailedCountAsync(targetUser, CancellationToken.None);
+            await store.IncrementAccessFailedCountAsync(targetUser, CancellationToken.None);
 
             Assert.Equal(++accessFailedCount, targetUser.AccessFailedCount);
         }
@@ -166,12 +165,12 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [InlineData(5)]
         [InlineData(1)]
         [InlineData(0)]
-        public void ShouldResetAccessFailedCountToZero(int accessFailedCount)
+        public async Task ShouldResetAccessFailedCountToZero(int accessFailedCount)
         {
             DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithAccessFailedCountOf(accessFailedCount);
 
-            store.ResetAccessFailedCountAsync(targetUser, CancellationToken.None);
+            await store.ResetAccessFailedCountAsync(targetUser, CancellationToken.None);
 
             Assert.Equal(0, targetUser.AccessFailedCount);
         }
