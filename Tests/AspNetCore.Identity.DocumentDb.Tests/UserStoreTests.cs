@@ -28,7 +28,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         public async Task ShouldSetNormalizedUserName()
         {
             DocumentDbIdentityUser user = DocumentDbIdentityUserBuilder.Create().WithNormalizedUserName();
-            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole> store = InitializeDocumentDbUserStore();
 
             string normalizedUserName = Guid.NewGuid().ToString();
             await store.SetNormalizedUserNameAsync(user, normalizedUserName, CancellationToken.None);
@@ -39,7 +39,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldReturnAllUsersWithAdminRoleClaim()
         {
-            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole> store = InitializeDocumentDbUserStore();
 
             string adminRoleValue = Guid.NewGuid().ToString();
 
@@ -67,7 +67,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldReturnUserByLoginProvider()
         {
-            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithUserLoginInfo(amount: 3);
             UserLoginInfo targetLogin = targetUser.Logins[1];
 
@@ -85,7 +85,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         {
             DocumentDbIdentityRole role = DocumentDbIdentityRoleBuilder.Create();
 
-            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser user = DocumentDbIdentityUserBuilder.Create().WithId().AddRole(role).AddRole().AddRole();
 
             bool result = await store.IsInRoleAsync(user, role.Name, CancellationToken.None);
@@ -96,7 +96,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldReturnUserIsNotInRole()
         {
-            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser user = DocumentDbIdentityUserBuilder.Create().WithId().AddRole().AddRole();
 
             bool result = await store.IsInRoleAsync(user, Guid.NewGuid().ToString(), CancellationToken.None);
@@ -109,7 +109,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         {
             DocumentDbIdentityRole role = DocumentDbIdentityRoleBuilder.Create();
 
-            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole> store = InitializeDocumentDbUserStore();
 
             DocumentDbIdentityUser firstAdmin = DocumentDbIdentityUserBuilder.Create().WithId().AddRole(role).AddRole();
             DocumentDbIdentityUser secondAdmin = DocumentDbIdentityUserBuilder.Create().WithId().AddRole(role).AddRole().AddRole();
@@ -135,7 +135,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldReturnUserBySpecificEmail()
         {
-            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail();
 
             CreateDocument(DocumentDbIdentityUserBuilder.Create());
@@ -153,7 +153,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [InlineData(5)]
         public async Task ShouldIncreaseAccessFailedCountBy1(int accessFailedCount)
         {
-            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithAccessFailedCountOf(accessFailedCount);
 
             await store.IncrementAccessFailedCountAsync(targetUser, CancellationToken.None);
@@ -167,7 +167,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [InlineData(0)]
         public async Task ShouldResetAccessFailedCountToZero(int accessFailedCount)
         {
-            DocumentDbUserStore<DocumentDbIdentityUser> store = InitializeDocumentDbUserStore();
+            DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole> store = InitializeDocumentDbUserStore();
             DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().WithAccessFailedCountOf(accessFailedCount);
 
             await store.ResetAccessFailedCountAsync(targetUser, CancellationToken.None);
@@ -175,17 +175,24 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             Assert.Equal(0, targetUser.AccessFailedCount);
         }
 
-        private  DocumentDbUserStore<DocumentDbIdentityUser> InitializeDocumentDbUserStore()
+        private  DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole> InitializeDocumentDbUserStore()
         {
-            return new DocumentDbUserStore<DocumentDbIdentityUser>(
+            IOptions<DocumentDbOptions> documentDbOptions = Options.Create(new DocumentDbOptions()
+            {
+                Database = documentDbFixture.Database,
+                UserStoreDocumentCollection = documentDbFixture.UserStoreDocumentCollection,
+                RoleStoreDocumentCollection = documentDbFixture.RoleStoreDocumentCollection
+            });
+
+            return new DocumentDbUserStore<DocumentDbIdentityUser, DocumentDbIdentityRole>(
                 documentClient: documentDbFixture.Client,
-                options: Options.Create(new DocumentDbOptions()
-                {
-                    Database = documentDbFixture.Database,
-                    UserStoreDocumentCollection = documentDbFixture.UserStoreDocumentCollection,
-                    RoleStoreDocumentCollection = documentDbFixture.RoleStoreDocumentCollection
-                }),
-                normalizer: documentDbFixture.Normalizer);
+                options: documentDbOptions,
+                normalizer: documentDbFixture.Normalizer,
+                roleStore: new DocumentDbRoleStore<DocumentDbIdentityRole>(
+                    documentClient: documentDbFixture.Client,
+                    options: documentDbOptions,
+                    normalizer: documentDbFixture.Normalizer)
+                );
         }
     }
 }

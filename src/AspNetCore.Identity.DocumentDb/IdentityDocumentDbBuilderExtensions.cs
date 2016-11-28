@@ -35,12 +35,12 @@ namespace AspNetCore.Identity.DocumentDb
             }
 
             builder.Services.AddSingleton(
-                typeof(IUserStore<>).MakeGenericType(builder.UserType),
-                typeof(DocumentDbUserStore<>).MakeGenericType(builder.UserType));
-
-            builder.Services.AddSingleton(
                 typeof(IRoleStore<>).MakeGenericType(builder.RoleType),
                 typeof(DocumentDbRoleStore<>).MakeGenericType(builder.RoleType));
+
+            builder.Services.AddSingleton(
+                typeof(IUserStore<>).MakeGenericType(builder.UserType),
+                typeof(DocumentDbUserStore<,>).MakeGenericType(builder.UserType, builder.RoleType));
 
             builder.Services.AddTransient<ILookupNormalizer, LookupNormalizer>();
 

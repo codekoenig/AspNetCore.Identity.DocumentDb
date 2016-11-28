@@ -159,8 +159,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            ResourceResponse<Document> result;
-
             if (role == null)
             {
                 throw new ArgumentNullException(nameof(role));
@@ -174,8 +172,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            ResourceResponse<Document> result;
-
             if (role == null)
             {
                 throw new ArgumentNullException(nameof(role));
@@ -188,8 +184,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-
-            ResourceResponse<Document> result;
 
             if (role == null)
             {
@@ -211,8 +205,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            ResourceResponse<Document> result;
-
             if (role == null)
             {
                 throw new ArgumentNullException(nameof(role));
@@ -225,8 +217,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
-
-            ResourceResponse<Document> result;
 
             if (role == null)
             {

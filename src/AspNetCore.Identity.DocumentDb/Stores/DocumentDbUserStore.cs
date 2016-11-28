@@ -13,7 +13,7 @@ using AspNetCore.Identity.DocumentDb.Tools;
 
 namespace AspNetCore.Identity.DocumentDb.Stores
 {
-    public class DocumentDbUserStore<TUser> :
+    public class DocumentDbUserStore<TUser, TRole> :
         StoreBase,
         IUserStore<TUser>,
         IUserClaimStore<TUser>,
@@ -26,10 +26,14 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         IUserEmailStore<TUser>,
         IUserLockoutStore<TUser>
         where TUser : DocumentDbIdentityUser
+        where TRole : DocumentDbIdentityRole
     {
-        public DocumentDbUserStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer)
+        private DocumentDbRoleStore<TRole> roleStore;
+
+        public DocumentDbUserStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer, DocumentDbRoleStore<TRole> roleStore)
             : base(documentClient, options, normalizer, options.Value.UserStoreDocumentCollection)
         {
+            this.roleStore = roleStore;
         }
 
         public async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken)
@@ -417,15 +421,34 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             return Task.FromResult(user);
         }
 
-        public Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+        public async Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
-            // TODO: Requires implemented role store so we can check if the passed roleName is valid
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (roleName == null)
+            {
+                throw new ArgumentNullException(nameof(roleName));
+            }
+
+            // Check if the given role name exists
+            TRole foundRole = await roleStore.FindByNameAsync(roleName, cancellationToken);
+
+            if (foundRole == null)
+            {
+                throw new ArgumentException(nameof(roleName));
+            }
+
+            user.Roles.Add(foundRole);
         }
 
-        public Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+        public async Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
-            // TODO: See AddToRoleAsync
             throw new NotImplementedException();
         }
 
