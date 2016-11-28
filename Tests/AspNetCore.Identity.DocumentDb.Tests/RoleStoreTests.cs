@@ -140,6 +140,63 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             Assert.DoesNotContain(targetRole.Claims, c => c.Type.Equals(claimToRemove.Type));
         }
 
+        [Fact]
+        public async Task ShouldReturnIdOfRole()
+        {
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId();
+
+            string result = await store.GetRoleIdAsync(targetRole, CancellationToken.None);
+
+            Assert.Equal(targetRole.Id, result);
+        }
+
+        [Fact]
+        public async Task ShouldReturnNameOfRole()
+        {
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId();
+
+            string result = await store.GetRoleNameAsync(targetRole, CancellationToken.None);
+
+            Assert.Equal(targetRole.Name, result);
+        }
+
+        [Fact]
+        public async Task ShouldReturnNormalizedNameOfRole()
+        {
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId().WithNormalizedRoleName();
+
+            string result = await store.GetNormalizedRoleNameAsync(targetRole, CancellationToken.None);
+
+            Assert.Equal(targetRole.NormalizedName, result);
+        }
+
+        [Fact]
+        public async Task ShouldSetNewRoleName()
+        {
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId();
+            string newRoleName = Guid.NewGuid().ToString();
+
+            await store.SetRoleNameAsync(targetRole, newRoleName, CancellationToken.None);
+
+            Assert.Equal(targetRole.Name, newRoleName);
+        }
+
+        [Fact]
+        public async Task ShouldSetNewNormalizedRoleName()
+        {
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId().WithNormalizedRoleName();
+            string newNormalizedRoleName = Guid.NewGuid().ToString();
+
+            await store.SetNormalizedRoleNameAsync(targetRole, newNormalizedRoleName, CancellationToken.None);
+
+            Assert.Equal(targetRole.NormalizedName, newNormalizedRoleName);
+        }
+
         private DocumentDbRoleStore<DocumentDbIdentityRole> InitializeDocumentDbRoleStore()
         {
             return new DocumentDbRoleStore<DocumentDbIdentityRole>(
