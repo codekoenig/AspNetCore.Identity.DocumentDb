@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace IdentitySample.Models
 {
     // Add profile data for application users by adding properties to the ApplicationUser class
-    public class ApplicationUser : DocumentDbIdentityUser
+    public class ApplicationUser : DocumentDbIdentityUser<DocumentDbIdentityRole>
     {
     }
 }

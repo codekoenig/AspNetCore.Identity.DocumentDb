@@ -25,5 +25,38 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         {
             Document doc = this.documentDbFixture.Client.CreateDocumentAsync(collectionUri, document).Result;
         }
+
+        protected DocumentDbUserStore<DocumentDbIdentityUser<DocumentDbIdentityRole>, DocumentDbIdentityRole> CreateUserStore()
+        {
+            IOptions<DocumentDbOptions> documentDbOptions = Options.Create(new DocumentDbOptions()
+            {
+                Database = documentDbFixture.Database,
+                UserStoreDocumentCollection = documentDbFixture.UserStoreDocumentCollection,
+                RoleStoreDocumentCollection = documentDbFixture.RoleStoreDocumentCollection
+            });
+
+            return new DocumentDbUserStore<DocumentDbIdentityUser<DocumentDbIdentityRole>, DocumentDbIdentityRole>(
+                documentClient: documentDbFixture.Client,
+                options: documentDbOptions,
+                normalizer: documentDbFixture.Normalizer,
+                roleStore: new DocumentDbRoleStore<DocumentDbIdentityRole>(
+                    documentClient: documentDbFixture.Client,
+                    options: documentDbOptions,
+                    normalizer: documentDbFixture.Normalizer)
+                );
+        }
+
+        protected DocumentDbRoleStore<DocumentDbIdentityRole> CreateRoleStore()
+        {
+            return new DocumentDbRoleStore<DocumentDbIdentityRole>(
+                documentClient: documentDbFixture.Client,
+                options: Options.Create(new DocumentDbOptions()
+                {
+                    Database = documentDbFixture.Database,
+                    UserStoreDocumentCollection = documentDbFixture.UserStoreDocumentCollection,
+                    RoleStoreDocumentCollection = documentDbFixture.RoleStoreDocumentCollection
+                }),
+                normalizer: documentDbFixture.Normalizer);
+        }
     }
 }

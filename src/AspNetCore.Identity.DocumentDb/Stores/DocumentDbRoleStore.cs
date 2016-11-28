@@ -17,9 +17,11 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         where TRole : DocumentDbIdentityRole
     {
         public DocumentDbRoleStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer)
-            : base(documentClient, options, normalizer, options.Value.RoleStoreDocumentCollection)
+            : base(documentClient, options, normalizer, options.Value.RoleStoreDocumentCollection ?? options.Value.UserStoreDocumentCollection)
         {
-            collectionUri = UriFactory.CreateDocumentCollectionUri(this.options.Database, this.options.RoleStoreDocumentCollection);
+            collectionUri = UriFactory.CreateDocumentCollectionUri(
+                this.options.Database, 
+                this.options.RoleStoreDocumentCollection ?? this.options.UserStoreDocumentCollection);
         }
 
         public Task<IList<Claim>> GetClaimsAsync(TRole role, CancellationToken cancellationToken = default(CancellationToken))

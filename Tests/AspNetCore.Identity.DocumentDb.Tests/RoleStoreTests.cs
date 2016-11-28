@@ -29,7 +29,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         public async Task ShouldCreateNewRoleInDatabase()
         {
             DocumentDbIdentityRole newRole = DocumentDbIdentityRoleBuilder.Create().WithId();
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
 
             // Create the new role
             IdentityResult result = store.CreateAsync(newRole, CancellationToken.None).Result;
@@ -44,7 +44,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldUpdateExistingRoleInDatabase()
         {
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole existingRole = DocumentDbIdentityRoleBuilder.Create().WithId();
 
             // Create sample data in DB
@@ -64,7 +64,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldReturnRoleById()
         {
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId();
 
             // Create sample data in DB
@@ -81,7 +81,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldDeleteRoleFromDb()
         {
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId();
 
             // Create sample data in DB
@@ -102,7 +102,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             string secondClaimType = Guid.NewGuid().ToString();
             string thirdClaimType = Guid.NewGuid().ToString();
 
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId().AddClaim(firstClaimType).AddClaim(secondClaimType).AddClaim(thirdClaimType);
 
             IList<Claim> returnedClaims = await store.GetClaimsAsync(targetRole, CancellationToken.None);
@@ -119,7 +119,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         {
             Claim newClaim = new Claim(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
 
-            DocumentDbRoleStore <DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore <DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId();
 
             await store.AddClaimAsync(targetRole, newClaim);
@@ -132,7 +132,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         {
             Claim claimToRemove = new Claim(Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
 
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId().AddClaim().AddClaim(claimToRemove).AddClaim();
 
             await store.RemoveClaimAsync(targetRole, claimToRemove, CancellationToken.None);
@@ -143,7 +143,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldReturnIdOfRole()
         {
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId();
 
             string result = await store.GetRoleIdAsync(targetRole, CancellationToken.None);
@@ -154,7 +154,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldReturnNameOfRole()
         {
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId();
 
             string result = await store.GetRoleNameAsync(targetRole, CancellationToken.None);
@@ -165,7 +165,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldReturnNormalizedNameOfRole()
         {
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId().WithNormalizedRoleName();
 
             string result = await store.GetNormalizedRoleNameAsync(targetRole, CancellationToken.None);
@@ -176,7 +176,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldSetNewRoleName()
         {
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId();
             string newRoleName = Guid.NewGuid().ToString();
 
@@ -188,26 +188,13 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         [Fact]
         public async Task ShouldSetNewNormalizedRoleName()
         {
-            DocumentDbRoleStore<DocumentDbIdentityRole> store = InitializeDocumentDbRoleStore();
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
             DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId().WithNormalizedRoleName();
             string newNormalizedRoleName = Guid.NewGuid().ToString();
 
             await store.SetNormalizedRoleNameAsync(targetRole, newNormalizedRoleName, CancellationToken.None);
 
             Assert.Equal(targetRole.NormalizedName, newNormalizedRoleName);
-        }
-
-        private DocumentDbRoleStore<DocumentDbIdentityRole> InitializeDocumentDbRoleStore()
-        {
-            return new DocumentDbRoleStore<DocumentDbIdentityRole>(
-                documentClient: documentDbFixture.Client,
-                options: Options.Create(new DocumentDbOptions()
-                {
-                    Database = documentDbFixture.Database,
-                    UserStoreDocumentCollection = documentDbFixture.UserStoreDocumentCollection,
-                    RoleStoreDocumentCollection = documentDbFixture.RoleStoreDocumentCollection
-                }),
-                normalizer: documentDbFixture.Normalizer);
         }
     }
 }

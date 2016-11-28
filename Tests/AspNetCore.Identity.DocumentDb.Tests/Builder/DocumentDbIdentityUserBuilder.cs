@@ -9,14 +9,14 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
 {
     public class DocumentDbIdentityUserBuilder
     {
-        protected DocumentDbIdentityUser identityUser;
+        protected DocumentDbIdentityUser<DocumentDbIdentityRole> identityUser;
 
-        public DocumentDbIdentityUserBuilder(DocumentDbIdentityUser identityUser)
+        public DocumentDbIdentityUserBuilder(DocumentDbIdentityUser<DocumentDbIdentityRole> identityUser)
         {
             this.identityUser = identityUser;
         }
 
-        public static implicit operator DocumentDbIdentityUser(DocumentDbIdentityUserBuilder builder)
+        public static implicit operator DocumentDbIdentityUser<DocumentDbIdentityRole>(DocumentDbIdentityUserBuilder builder)
         {
             return builder.identityUser;
         }
@@ -31,7 +31,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
                 email = userName + "@test.at";
             }
 
-            return new DocumentDbIdentityUserBuilder(new DocumentDbIdentityUser()
+            return new DocumentDbIdentityUserBuilder(new DocumentDbIdentityUser<DocumentDbIdentityRole>()
             {
                 UserName = userName,
                 Email = userName

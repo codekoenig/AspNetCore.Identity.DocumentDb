@@ -25,12 +25,12 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         IUserPhoneNumberStore<TUser>,
         IUserEmailStore<TUser>,
         IUserLockoutStore<TUser>
-        where TUser : DocumentDbIdentityUser
+        where TUser : DocumentDbIdentityUser<TRole>
         where TRole : DocumentDbIdentityRole
     {
-        private DocumentDbRoleStore<TRole> roleStore;
+        private IRoleStore<TRole> roleStore;
 
-        public DocumentDbUserStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer, DocumentDbRoleStore<TRole> roleStore)
+        public DocumentDbUserStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer, IRoleStore<TRole> roleStore)
             : base(documentClient, options, normalizer, options.Value.UserStoreDocumentCollection)
         {
             this.roleStore = roleStore;
@@ -447,9 +447,29 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             user.Roles.Add(foundRole);
         }
 
-        public async Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+        public Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (roleName == null)
+            {
+                throw new ArgumentNullException(nameof(roleName));
+            }
+
+            TRole roleToRemove = user.Roles.FirstOrDefault(r => r.Name == roleName);
+
+            if (roleToRemove != null)
+            {
+                user.Roles.Remove(roleToRemove);
+            }
+
+            return Task.CompletedTask;
         }
 
         public Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken)

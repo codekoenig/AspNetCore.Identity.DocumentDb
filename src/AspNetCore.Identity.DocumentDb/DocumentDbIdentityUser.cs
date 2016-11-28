@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.DocumentDb
 {
-    public class DocumentDbIdentityUser : DocumentBase
+    public class DocumentDbIdentityUser<TRole> : DocumentBase
     {
         public DocumentDbIdentityUser()
         {
-            this.Roles = new List<DocumentDbIdentityRole>();
+            this.Roles = new List<TRole>();
             this.Logins = new List<UserLoginInfo>();
             this.Claims = new List<Claim>();
         }
@@ -54,7 +54,7 @@ namespace AspNetCore.Identity.DocumentDb
         public IList<UserLoginInfo> Logins { get; set; }
 
         [JsonProperty(PropertyName = "roles")]
-        public IList<DocumentDbIdentityRole> Roles { get; set; }
+        public IList<TRole> Roles { get; set; }
 
         [JsonProperty(PropertyName = "claims")]
         public IList<Claim> Claims { get; set; }
