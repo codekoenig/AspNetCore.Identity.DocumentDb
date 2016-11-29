@@ -106,7 +106,7 @@ Support for automatic partitioning is planned for a future release.
 As you need to create the document collections to store users and roles yourself, you are also responsible
 for setting up indexes in those document collections. If you go with the default index everything approach,
 you're good. If you want to use a more granular indexing approach to save storage and reduce RU cost on
-writing new documents, here's a recommendation which properties should be indext for best possible read
+writing new documents, here's a recommendation which properties should be indexed for best possible read
 performance:
 
 * User documents:
