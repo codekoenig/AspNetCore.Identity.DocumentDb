@@ -1,8 +1,8 @@
 # AspNetCore.Identity.DocumentDb
 
 AspNetCore.Identity.DocumentDb is a storage provider for ASP.NET Core Identity that allows you to use Azure DocumentDB
-as it's data store instead of the default SQL Server store that supports all features of Identity, including **full role
-support** or **external authentication services**.
+as it's data store instead of the default SQL Server store. It supports all features of Identity, including **full role
+support** and **external authentication services**.
 
 ## Supported Identity features
 
