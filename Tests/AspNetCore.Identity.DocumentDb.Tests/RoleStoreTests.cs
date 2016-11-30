@@ -79,6 +79,23 @@ namespace AspNetCore.Identity.DocumentDb.Tests
         }
 
         [Fact]
+        public async Task ShouldReturnRoleByName()
+        {
+            DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();
+            DocumentDbIdentityRole targetRole = DocumentDbIdentityRoleBuilder.Create().WithId().WithNormalizedRoleName();
+
+            // Create sample data in DB
+            CreateDocument(DocumentDbIdentityRoleBuilder.Create().WithNormalizedRoleName());
+            CreateDocument(DocumentDbIdentityRoleBuilder.Create().WithNormalizedRoleName());
+            CreateDocument(targetRole);
+            CreateDocument(DocumentDbIdentityRoleBuilder.Create().WithNormalizedRoleName());
+
+            DocumentDbIdentityRole queriedRole = await store.FindByNameAsync(targetRole.NormalizedName, CancellationToken.None);
+
+            Assert.Equal(targetRole.Id, queriedRole.Id);
+        }
+
+        [Fact]
         public async Task ShouldDeleteRoleFromDb()
         {
             DocumentDbRoleStore<DocumentDbIdentityRole> store = CreateRoleStore();

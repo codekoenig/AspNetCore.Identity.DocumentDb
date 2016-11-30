@@ -261,7 +261,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             }
 
             TRole role = documentClient.CreateDocumentQuery<TRole>(collectionUri)
-                .Where(r => r.NormalizedName == normalizedRoleName)
+                .Where(r => r.NormalizedName == normalizedRoleName && r.DocumentType == typeof(TRole).Name)
                 .AsEnumerable()
                 .FirstOrDefault();
 

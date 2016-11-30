@@ -1,4 +1,5 @@
-﻿using AspNetCore.Identity.DocumentDb.Stores;
+﻿using AspNetCore.Identity.DocumentDb;
+using AspNetCore.Identity.DocumentDb.Stores;
 using AspNetCore.Identity.DocumentDb.Tests.Builder;
 using AspNetCore.Identity.DocumentDb.Tests.Fixtures;
 using Microsoft.AspNetCore.Identity;
@@ -202,6 +203,38 @@ namespace AspNetCore.Identity.DocumentDb.Tests
 
             // Add the created sample data role to the user
             await Assert.ThrowsAsync(typeof(ArgumentException), async () => await userStore.AddToRoleAsync(targetUser, targetRole.Name, CancellationToken.None));
+        }
+
+        [Fact]
+        public async Task ShouldReturnUserByUserName()
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser<DocumentDbIdentityRole>, DocumentDbIdentityRole> userStore = CreateUserStore();
+            DocumentDbIdentityUser<DocumentDbIdentityRole> targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName();
+
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName());
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName());
+            CreateDocument(targetUser);
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedUserName());
+
+            DocumentDbIdentityUser<DocumentDbIdentityRole> foundUser = await userStore.FindByNameAsync(targetUser.NormalizedUserName, CancellationToken.None);
+
+            Assert.Equal(targetUser.Id, foundUser.Id);
+        }
+
+        [Fact]
+        public async Task ShouldReturnUserByEmail()
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser<DocumentDbIdentityRole>, DocumentDbIdentityRole> userStore = CreateUserStore();
+            DocumentDbIdentityUser<DocumentDbIdentityRole> targetUser = DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail();
+
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail());
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail());
+            CreateDocument(targetUser);
+            CreateDocument(DocumentDbIdentityUserBuilder.Create().WithId().WithNormalizedEmail());
+
+            DocumentDbIdentityUser<DocumentDbIdentityRole> foundUser = await userStore.FindByEmailAsync(targetUser.NormalizedEmail, CancellationToken.None);
+
+            Assert.Equal(targetUser.Id, foundUser.Id);
         }
     }
 }
