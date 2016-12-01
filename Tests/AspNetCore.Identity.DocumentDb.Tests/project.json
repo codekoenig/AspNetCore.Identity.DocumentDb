@@ -5,7 +5,7 @@
     "xunit": "2.2.0-beta4-build3444",
     "Microsoft.Azure.DocumentDB.Core": "0.1.0-preview",
     "dotnet-test-xunit": "2.2.0-preview2-build1029",
-    "AspNetCore.Identity.DocumentDb": "1.0.0-*"
+    "AspNetCore.Identity.DocumentDb": "1.0.0-beta"
   },
   
   "frameworks": {
