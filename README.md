@@ -39,8 +39,7 @@ AspNetCore.Identity.DocumentDb works just like the default SQL Server storage pr
   as you would with the SQL Server provider, just make sure you specify `DocumentDbIdentityUser` and `DocumentDbIdentityRole`
   as the generic type parameters to use with AspNetIdentity.
 * Finally, the actual storage provider can be registered with `.AddDocumentDbStores()`- be sure to configure the options
-  for the store and specify at least the `
-  base` and `UserStoreDocumentCollection` to specify which database
+  for the store and specify at least the `Database` and `UserStoreDocumentCollection` to specify which database
   and document collection AspNetCore.Identity.DocumentDb should use to store data.
 
 ```CSharp
