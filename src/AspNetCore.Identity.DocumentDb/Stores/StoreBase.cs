@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Options;
 using System;
@@ -12,13 +13,13 @@ namespace AspNetCore.Identity.DocumentDb.Stores
     {
         protected bool disposed = false;
 
-        protected DocumentClient documentClient;
+        protected IDocumentClient documentClient;
         protected DocumentDbOptions options;
         protected ILookupNormalizer normalizer;
         protected Uri collectionUri;
         protected string collectionName;
 
-        protected StoreBase(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer, string collectionName)
+        protected StoreBase(IDocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer, string collectionName)
         {
             this.documentClient = documentClient;
             this.options = options.Value;

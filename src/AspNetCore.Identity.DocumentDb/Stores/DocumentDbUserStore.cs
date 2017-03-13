@@ -30,7 +30,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
     {
         private IRoleStore<TRole> roleStore;
 
-        public DocumentDbUserStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer, IRoleStore<TRole> roleStore)
+        public DocumentDbUserStore(IDocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer, IRoleStore<TRole> roleStore)
             : base(documentClient, options, normalizer, options.Value.UserStoreDocumentCollection)
         {
             this.roleStore = roleStore;

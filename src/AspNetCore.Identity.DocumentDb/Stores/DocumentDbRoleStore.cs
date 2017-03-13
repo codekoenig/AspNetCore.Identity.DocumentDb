@@ -16,7 +16,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
     public class DocumentDbRoleStore<TRole> : StoreBase, IRoleClaimStore<TRole>
         where TRole : DocumentDbIdentityRole
     {
-        public DocumentDbRoleStore(DocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer)
+        public DocumentDbRoleStore(IDocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer)
             : base(documentClient, options, normalizer, options.Value.RoleStoreDocumentCollection ?? options.Value.UserStoreDocumentCollection)
         {
             collectionUri = UriFactory.CreateDocumentCollectionUri(

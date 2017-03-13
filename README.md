@@ -33,7 +33,7 @@ Install-Package CodeKoenig.AspNetCore.Identity.DocumentDb -Pre
 
 AspNetCore.Identity.DocumentDb works just like the default SQL Server storage provider:
 
-* When registering services in `ConfigureServices()` in `startup.cs`, you first need to register your DocumentDbClient
+* When registering services in `ConfigureServices()` in `startup.cs`, you first need to register your `IDocumentClient`
   instance that also AspNetCore.Identity.DocumentDb will resolve to access your DocumentDb database.
 * Next, register ASP.NET Identity by calling `services.AddIdentity<DocumentDbIdentityUser, DocumentDbIdentityRole>()`
   as you would with the SQL Server provider, just make sure you specify `DocumentDbIdentityUser` and `DocumentDbIdentityRole`
@@ -46,7 +46,7 @@ AspNetCore.Identity.DocumentDb works just like the default SQL Server storage pr
 public void ConfigureServices(IServiceCollection services)
 {
     // Add DocumentDb client singleton instance (it's recommended to use a singleton instance for it)
-    services.AddSingleton(InitializeDocumentClient("https://localhost:8081/", "YourAuthorizationKey");
+    services.AddSingleton<IDocumentClient>(new DocumentClient("https://localhost:8081/", "YourAuthorizationKey");
 
     // Add framework services.
     services.AddIdentity<DocumentDbIdentityUser, DocumentDbIdentityRole>()
