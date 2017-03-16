@@ -421,7 +421,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             return Task.FromResult(user);
         }
 
-        public async Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+        public async Task AddToRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -431,23 +431,23 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (roleName == null)
+            if (normalizedRoleName == null)
             {
-                throw new ArgumentNullException(nameof(roleName));
+                throw new ArgumentNullException(nameof(normalizedRoleName));
             }
 
             // Check if the given role name exists
-            TRole foundRole = await roleStore.FindByNameAsync(roleName, cancellationToken);
+            TRole foundRole = await roleStore.FindByNameAsync(normalizedRoleName, cancellationToken);
 
             if (foundRole == null)
             {
-                throw new ArgumentException(nameof(roleName));
+                throw new ArgumentException(nameof(normalizedRoleName), $"The role with the given name {normalizedRoleName} does not exist");
             }
 
             user.Roles.Add(foundRole);
         }
 
-        public Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+        public Task RemoveFromRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -457,12 +457,12 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (roleName == null)
+            if (normalizedRoleName == null)
             {
-                throw new ArgumentNullException(nameof(roleName));
+                throw new ArgumentNullException(nameof(normalizedRoleName));
             }
 
-            TRole roleToRemove = user.Roles.FirstOrDefault(r => r.Name == roleName);
+            TRole roleToRemove = user.Roles.FirstOrDefault(r => r.Name == normalizedRoleName);
 
             if (roleToRemove != null)
             {
@@ -487,7 +487,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             return Task.FromResult(userRoles);
         }
 
-        public Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
+        public Task<bool> IsInRoleAsync(TUser user, string normalizedRoleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -497,29 +497,29 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (roleName == null)
+            if (normalizedRoleName == null)
             {
-                throw new ArgumentNullException(nameof(roleName));
+                throw new ArgumentNullException(nameof(normalizedRoleName));
             }
 
-            bool isInRole = user.Roles.Any(r => r.Name.Equals(roleName));
+            bool isInRole = user.Roles.Any(r => r.Name.Equals(normalizedRoleName));
 
             return Task.FromResult(isInRole);
         }
 
-        public Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        public Task<IList<TUser>> GetUsersInRoleAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
 
-            if (roleName == null)
+            if (normalizedRoleName == null)
             {
-                throw new ArgumentNullException(nameof(roleName));
+                throw new ArgumentNullException(nameof(normalizedRoleName));
             }
 
             var result = documentClient.CreateDocumentQuery<TUser>(collectionUri)
                 .SelectMany(u => u.Roles
-                    .Where(r => r.Name == roleName)
+                    .Where(r => r.Name == normalizedRoleName)
                     .Select(r => u)
                 ).ToList();
 
