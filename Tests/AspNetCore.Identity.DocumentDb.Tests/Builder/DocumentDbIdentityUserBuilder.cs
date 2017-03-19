@@ -27,7 +27,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
 
             if (userName == null)
             {
-                userName = Guid.NewGuid().ToString();
+                userName = Guid.NewGuid().ToString().ToUpper();
                 email = userName + "@test.at";
             }
 
@@ -40,7 +40,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
 
         public DocumentDbIdentityUserBuilder WithId(string id = null)
         {
-            identityUser.Id = id ?? Guid.NewGuid().ToString();
+            identityUser.Id = id ?? Guid.NewGuid().ToString().ToUpper();
             return this;
         }
 

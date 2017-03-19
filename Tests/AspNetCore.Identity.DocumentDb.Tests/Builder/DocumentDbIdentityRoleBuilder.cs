@@ -25,7 +25,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
         {
             if (roleName == null)
             {
-                roleName = Guid.NewGuid().ToString();
+                roleName = Guid.NewGuid().ToString().ToUpper();
             }
 
             return new DocumentDbIdentityRoleBuilder(new DocumentDbIdentityRole()
@@ -36,7 +36,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
 
         public DocumentDbIdentityRoleBuilder WithId(string id = null)
         {
-            identityRole.Id = id ?? Guid.NewGuid().ToString();
+            identityRole.Id = id ?? Guid.NewGuid().ToString().ToUpper();
             return this;
         }
 
