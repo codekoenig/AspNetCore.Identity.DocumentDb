@@ -112,7 +112,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             }
 
             TUser foundUser = documentClient.CreateDocumentQuery<TUser>(collectionUri)
-                .Where(u => u.UserName == normalizedUserName && u.DocumentType == typeof(TUser).Name)
+                .Where(u => u.NormalizedUserName == normalizedUserName && u.DocumentType == typeof(TUser).Name)
                 .AsEnumerable()
                 .FirstOrDefault();
 
@@ -462,7 +462,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(normalizedRoleName));
             }
 
-            TRole roleToRemove = user.Roles.FirstOrDefault(r => r.Name == normalizedRoleName);
+            TRole roleToRemove = user.Roles.FirstOrDefault(r => r.NormalizedName == normalizedRoleName);
 
             if (roleToRemove != null)
             {
@@ -502,7 +502,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(normalizedRoleName));
             }
 
-            bool isInRole = user.Roles.Any(r => r.Name.Equals(normalizedRoleName));
+            bool isInRole = user.Roles.Any(r => r.NormalizedName.Equals(normalizedRoleName));
 
             return Task.FromResult(isInRole);
         }
@@ -519,7 +519,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
 
             var result = documentClient.CreateDocumentQuery<TUser>(collectionUri)
                 .SelectMany(u => u.Roles
-                    .Where(r => r.Name == normalizedRoleName)
+                    .Where(r => r.NormalizedName == normalizedRoleName)
                     .Select(r => u)
                 ).ToList();
 

@@ -78,14 +78,21 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
         {
             if (role == null)
             {
+                LookupNormalizer normalizer = new LookupNormalizer();
+                string newRoleName = Guid.NewGuid().ToString().ToUpper();
+
                 role = new DocumentDbIdentityRole()
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    Name = Guid.NewGuid().ToString()
+                    Id = Guid.NewGuid().ToString().ToUpper(),
+                    Name = newRoleName,
+                    NormalizedName = normalizer.Normalize(newRoleName)
                 };
             }
+            else
+            {
+                identityUser.Roles.Add(role);
+            }
 
-            identityUser.Roles.Add(role);
             return this;
         }
 
@@ -93,7 +100,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
         {
             LookupNormalizer normalizer = new LookupNormalizer();
 
-            identityUser.NormalizedEmail =  normalizer.Normalize(identityUser.Email);
+            identityUser.NormalizedEmail = normalizer.Normalize(identityUser.Email);
             return this;
         }
 
@@ -104,8 +111,8 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
             for (int i = 0; i < amount; i++)
             {
                 logins.Add(new UserLoginInfo(
-                    Guid.NewGuid().ToString(), 
-                    Guid.NewGuid().ToString(), 
+                    Guid.NewGuid().ToString(),
+                    Guid.NewGuid().ToString(),
                     Guid.NewGuid().ToString()));
             }
 
