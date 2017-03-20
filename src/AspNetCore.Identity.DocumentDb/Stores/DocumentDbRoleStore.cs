@@ -13,11 +13,20 @@ using AspNetCore.Identity.DocumentDb.Tools;
 
 namespace AspNetCore.Identity.DocumentDb.Stores
 {
+    /// <summary>
+    /// Represents a DocumentDb-based persistence store for ASP.NET Core Identity roles
+    /// </summary>
+    /// <typeparam name="TRole">The type representing a role</typeparam>
     public class DocumentDbRoleStore<TRole> : StoreBase, IRoleClaimStore<TRole>
         where TRole : DocumentDbIdentityRole
     {
-        public DocumentDbRoleStore(IDocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer)
-            : base(documentClient, options, normalizer, options.Value.RoleStoreDocumentCollection ?? options.Value.UserStoreDocumentCollection)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DocumentDbRoleStore{TRole}"/>
+        /// </summary>
+        /// <param name="documentClient">The DocumentDb client to be used</param>
+        /// <param name="options">The configuraiton options for the <see cref="IDocumentClient"/></param>
+        public DocumentDbRoleStore(IDocumentClient documentClient, IOptions<DocumentDbOptions> options)
+            : base(documentClient, options, options.Value.RoleStoreDocumentCollection ?? options.Value.UserStoreDocumentCollection)
         {
             collectionUri = UriFactory.CreateDocumentCollectionUri(
                 this.options.Database, 

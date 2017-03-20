@@ -13,15 +13,30 @@ using AspNetCore.Identity.DocumentDb.Tools;
 
 namespace AspNetCore.Identity.DocumentDb.Stores
 {
+    /// <summary>
+    /// Represents a DocumentDb-based persistence store for ASP.NET Core Identity users with the role type defaulted to <see cref="DocumentDbIdentityRole"/>
+    /// </summary>
+    /// <typeparam name="TUser">The type representing a user</typeparam>
     public class DocumentDbUserStore<TUser> : DocumentDbUserStore<TUser, DocumentDbIdentityRole>
         where TUser: DocumentDbIdentityUser
     {
-        public DocumentDbUserStore(IDocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer, IRoleStore<DocumentDbIdentityRole> roleStore)
-            : base(documentClient, options, normalizer, roleStore)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DocumentDbUserStore{TUser}"/>
+        /// </summary>
+        /// <param name="documentClient">The DocumentDb client to be used</param>
+        /// <param name="options">The configuraiton options for the <see cref="IDocumentClient"/></param>
+        /// <param name="roleStore">The <see cref="IRoleStore{TRole}"/> to be used for storing and retrieving roles for the user</param>
+        public DocumentDbUserStore(IDocumentClient documentClient, IOptions<DocumentDbOptions> options, IRoleStore<DocumentDbIdentityRole> roleStore)
+            : base(documentClient, options, roleStore)
         {
         }
     }
 
+    /// <summary>
+    /// Represents a DocumentDb-based persistence store for ASP.NET Core Identity users
+    /// </summary>
+    /// <typeparam name="TUser">The type representing a user</typeparam>
+    /// <typeparam name="TRole">The type representing a role</typeparam>
     public class DocumentDbUserStore<TUser, TRole> :
         StoreBase,
         IUserStore<TUser>,
@@ -39,8 +54,14 @@ namespace AspNetCore.Identity.DocumentDb.Stores
     {
         private IRoleStore<TRole> roleStore;
 
-        public DocumentDbUserStore(IDocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer, IRoleStore<TRole> roleStore)
-            : base(documentClient, options, normalizer, options.Value.UserStoreDocumentCollection)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DocumentDbUserStore{TUser, TRole}"/>
+        /// </summary>
+        /// <param name="documentClient">The DocumentDb client to be used</param>
+        /// <param name="options">The configuraiton options for the <see cref="IDocumentClient"/></param>
+        /// <param name="roleStore">The <see cref="IRoleStore{TRole}"/> to be used for storing and retrieving roles for the user</param>
+        public DocumentDbUserStore(IDocumentClient documentClient, IOptions<DocumentDbOptions> options, IRoleStore<TRole> roleStore)
+            : base(documentClient, options, options.Value.UserStoreDocumentCollection)
         {
             this.roleStore = roleStore;
         }

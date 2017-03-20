@@ -8,10 +8,16 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.DocumentDb
 {
+    /// <summary>
+    /// Represents a user in the identity system for the <see cref="Stores.DocumentDbUserStore{TUser, TRole}"/> with the role type defaulted to <see cref="DocumentDbIdentityRole"/>
+    /// </summary>
     public class DocumentDbIdentityUser : DocumentDbIdentityUser<DocumentDbIdentityRole>
     {
     }
 
+    /// <summary>
+    /// Represents a user in the identity system for the <see cref="Stores.DocumentDbUserStore{TUser, TRole}"/>
+    /// </summary>
     public class DocumentDbIdentityUser<TRole> : DocumentBase
     {
         public DocumentDbIdentityUser()

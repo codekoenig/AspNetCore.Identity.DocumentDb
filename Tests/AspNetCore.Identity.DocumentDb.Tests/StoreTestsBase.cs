@@ -38,11 +38,9 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             return new DocumentDbUserStore<DocumentDbIdentityUser>(
                 documentClient: documentDbFixture.Client,
                 options: documentDbOptions,
-                normalizer: documentDbFixture.Normalizer,
                 roleStore: new DocumentDbRoleStore<DocumentDbIdentityRole>(
                     documentClient: documentDbFixture.Client,
-                    options: documentDbOptions,
-                    normalizer: documentDbFixture.Normalizer)
+                    options: documentDbOptions)
                 );
         }
 
@@ -55,8 +53,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
                     Database = documentDbFixture.Database,
                     UserStoreDocumentCollection = documentDbFixture.UserStoreDocumentCollection,
                     RoleStoreDocumentCollection = documentDbFixture.RoleStoreDocumentCollection
-                }),
-                normalizer: documentDbFixture.Normalizer);
+                }));
         }
     }
 }
