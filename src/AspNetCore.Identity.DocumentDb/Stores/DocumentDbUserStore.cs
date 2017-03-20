@@ -13,6 +13,15 @@ using AspNetCore.Identity.DocumentDb.Tools;
 
 namespace AspNetCore.Identity.DocumentDb.Stores
 {
+    public class DocumentDbUserStore<TUser> : DocumentDbUserStore<TUser, DocumentDbIdentityRole>
+        where TUser: DocumentDbIdentityUser
+    {
+        public DocumentDbUserStore(IDocumentClient documentClient, IOptions<DocumentDbOptions> options, ILookupNormalizer normalizer, IRoleStore<DocumentDbIdentityRole> roleStore)
+            : base(documentClient, options, normalizer, roleStore)
+        {
+        }
+    }
+
     public class DocumentDbUserStore<TUser, TRole> :
         StoreBase,
         IUserStore<TUser>,

@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 
 namespace AspNetCore.Identity.DocumentDb
 {
+    public class DocumentDbIdentityUser : DocumentDbIdentityUser<DocumentDbIdentityRole>
+    {
+    }
+
     public class DocumentDbIdentityUser<TRole> : DocumentBase
     {
         public DocumentDbIdentityUser()

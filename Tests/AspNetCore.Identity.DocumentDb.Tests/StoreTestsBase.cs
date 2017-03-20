@@ -26,7 +26,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             Document doc = this.documentDbFixture.Client.CreateDocumentAsync(collectionUri, document).Result;
         }
 
-        protected DocumentDbUserStore<DocumentDbIdentityUser<DocumentDbIdentityRole>, DocumentDbIdentityRole> CreateUserStore()
+        protected DocumentDbUserStore<DocumentDbIdentityUser> CreateUserStore()
         {
             IOptions<DocumentDbOptions> documentDbOptions = Options.Create(new DocumentDbOptions()
             {
@@ -35,7 +35,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
                 RoleStoreDocumentCollection = documentDbFixture.RoleStoreDocumentCollection
             });
 
-            return new DocumentDbUserStore<DocumentDbIdentityUser<DocumentDbIdentityRole>, DocumentDbIdentityRole>(
+            return new DocumentDbUserStore<DocumentDbIdentityUser>(
                 documentClient: documentDbFixture.Client,
                 options: documentDbOptions,
                 normalizer: documentDbFixture.Normalizer,
