@@ -1,7 +1,6 @@
 ﻿using AspNetCore.Identity.DocumentDb.Stores;
 using AspNetCore.Identity.DocumentDb.Tests.Fixtures;
 using Microsoft.Azure.Documents;
-using Microsoft.Azure.Documents.Client;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;

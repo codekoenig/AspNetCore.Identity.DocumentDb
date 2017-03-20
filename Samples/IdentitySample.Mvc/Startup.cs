@@ -9,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using IdentitySample.Models;
 using IdentitySample.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection;
 using System.IO;
 using AspNetCore.Identity.DocumentDb;
