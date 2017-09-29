@@ -1,13 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0F067842-A952-4A9F-B6D9-CF7CF6AF5A45}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{EF8C4EF7-972F-48C6-8EDF-E46A7EAB61CF}"
 	ProjectSection(SolutionItems) = preProject
-		global.json = global.json
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -47,5 +46,8 @@ Global
 		{6B44E67C-EA8A-48F3-BF49-EA3642AAD033} = {0F067842-A952-4A9F-B6D9-CF7CF6AF5A45}
 		{BADF7B07-258C-474E-878B-AB720F65E910} = {2C513BEF-CCD9-4528-A444-B45E90E90CCA}
 		{B8A465AD-AFD3-4925-9BDD-0A1D48357E9F} = {051D9068-906C-4767-A0C8-32CECB631923}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6A40F15C-78EE-48B1-8478-840EFBC427EA}
 	EndGlobalSection
 EndGlobal

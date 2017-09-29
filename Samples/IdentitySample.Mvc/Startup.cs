@@ -37,7 +37,7 @@ namespace IdentitySample
             if (env.IsDevelopment())
             {
                 // For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
-                builder.AddUserSecrets();
+                builder.AddUserSecrets<Startup>();
             }
 
             builder.AddEnvironmentVariables();
@@ -55,18 +55,15 @@ namespace IdentitySample
                 Configuration.GetValue<string>("DocumentDbClient:AuthorizationKey")));
 
             // Add framework services.
-            services.AddIdentity<ApplicationUser, DocumentDbIdentityRole>(options =>
-            {
-                options.Cookies.ApplicationCookie.AuthenticationScheme = "ApplicationCookie";
-                options.Cookies.ApplicationCookie.CookieName = "Interop";
-                options.Cookies.ApplicationCookie.DataProtectionProvider = DataProtectionProvider.Create(new DirectoryInfo("C:\\Github\\Identity\\artifacts"));
-            })
+
+            services.AddAuthentication();
+
+            services.AddIdentity<ApplicationUser, DocumentDbIdentityRole>()
                 .AddDocumentDbStores(options =>
                 {
                     options.UserStoreDocumentCollection = "AspNetIdentity";
                     options.Database = "AspNetCoreIdentitySample";
-                })
-                .AddDefaultTokenProviders();
+                });
 
             services.AddMvc();
 
@@ -91,7 +88,7 @@ namespace IdentitySample
             }
             app.UseStaticFiles();
 
-            app.UseIdentity();
+            app.UseAuthentication();
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
 
             app.UseMvc(routes =>
