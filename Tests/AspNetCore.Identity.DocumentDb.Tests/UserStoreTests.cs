@@ -310,5 +310,109 @@ namespace AspNetCore.Identity.DocumentDb.Tests
 
             Assert.Equal(targetUser.Id, foundUser.Id);
         }
+#if NETCORE2
+        [Fact]
+        public async Task ShouldSetAuthenticatorKeyAsync()
+        {
+            // Arrange
+            var userStore = CreateUserStore();
+            var user = (DocumentDbIdentityUser)DocumentDbIdentityUserBuilder.Create();
+            var key = Guid.NewGuid().ToString();
+
+            // Act
+            await userStore.SetAuthenticatorKeyAsync(user, key, CancellationToken.None);
+
+            // Assert
+            Assert.Equal(key, user.AuthenticatorKey);
+        }
+
+        [Fact]
+        public async Task ShouldGetAuthenticatorKeyAsync()
+        {
+            // Arrange
+            var userStore = CreateUserStore();
+            var user = (DocumentDbIdentityUser)DocumentDbIdentityUserBuilder.Create();
+            var expectedKey = Guid.NewGuid().ToString();
+            user.AuthenticatorKey = expectedKey;
+
+            // Act
+            var key = await userStore.GetAuthenticatorKeyAsync(user, CancellationToken.None);
+
+            // Assert
+            Assert.Equal(expectedKey, key);
+        }
+
+        [Fact]
+        public async Task ShouldReplaceRecoveryCodes()
+        {
+            // Arrange
+            var userStore = CreateUserStore();
+            var user = (DocumentDbIdentityUser)DocumentDbIdentityUserBuilder.Create();
+            var replacementCodes = new string[] { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+            user.RecoveryCodes = new string[] { Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+
+            // Act
+            await userStore.ReplaceCodesAsync(user, replacementCodes, CancellationToken.None);
+
+            // Assert
+            Assert.Equal(replacementCodes, user.RecoveryCodes);
+        }
+
+        [Fact]
+        public async Task ShouldRemoveTheRedeemedCodeAndReturnTrue()
+        {
+            // Arrange
+            var userStore = CreateUserStore();
+            var user = (DocumentDbIdentityUser)DocumentDbIdentityUserBuilder.Create();
+            var codeToRedeem = Guid.NewGuid().ToString();
+            var expectedCode1 = Guid.NewGuid().ToString();
+            var expectedCode2 = Guid.NewGuid().ToString();
+            user.RecoveryCodes = new string[] { expectedCode1, codeToRedeem, expectedCode2 };
+
+            // Act
+            var result = await userStore.RedeemCodeAsync(user, codeToRedeem, CancellationToken.None);
+
+            // Assert
+            Assert.True(result);
+            Assert.Collection(user.RecoveryCodes,
+                code => Assert.Equal(expectedCode1, code),
+                code => Assert.Equal(expectedCode2, code)
+            );
+        }
+
+        [Fact]
+        public async Task ShouldReturnFalseIfRecoveryCodeDoesNotExistsInTheCollection()
+        {
+            // Arrange
+            var userStore = CreateUserStore();
+            var user = (DocumentDbIdentityUser)DocumentDbIdentityUserBuilder.Create();
+            var codeToRedeem = Guid.NewGuid().ToString();
+            var expectedCode1 = Guid.NewGuid().ToString();
+            var expectedCode2 = Guid.NewGuid().ToString();
+            user.RecoveryCodes = new string[] { expectedCode1, expectedCode2 };
+
+            // Act
+            var result = await userStore.RedeemCodeAsync(user, codeToRedeem, CancellationToken.None);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task ShouldReturnRecoveryCodesCount()
+        {
+            // Arrange
+            var userStore = CreateUserStore();
+            var user = (DocumentDbIdentityUser)DocumentDbIdentityUserBuilder.Create();
+            user.RecoveryCodes = new string[] { Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString() };
+            var expectedCount = 3;
+
+            // Act
+            var result = await userStore.CountCodesAsync(user, CancellationToken.None);
+
+            // Assert
+            Assert.Equal(expectedCount, result);
+        }
+#endif
     }
 }
