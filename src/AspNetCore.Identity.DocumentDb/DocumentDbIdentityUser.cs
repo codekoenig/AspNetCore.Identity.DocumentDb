@@ -77,5 +77,13 @@ namespace AspNetCore.Identity.DocumentDb
 
         [JsonProperty(PropertyName = "accessFailedCount")]
         public int AccessFailedCount { get; set; }
+
+#if NETSTANDARD2
+        [JsonProperty(PropertyName = "authenticatorKey")]
+        public string AuthenticatorKey { get; set; }
+
+        [JsonProperty(PropertyName = "recoveryCodes")]
+        public IEnumerable<string> RecoveryCodes { get; set; }
+#endif
     }
 }

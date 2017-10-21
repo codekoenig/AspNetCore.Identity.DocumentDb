@@ -48,6 +48,10 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         IUserTwoFactorStore<TUser>,
         IUserPhoneNumberStore<TUser>,
         IUserEmailStore<TUser>,
+#if NETSTANDARD2
+        IUserAuthenticatorKeyStore<TUser>,
+        IUserTwoFactorRecoveryCodeStore<TUser>,
+#endif
         IUserLockoutStore<TUser>
         where TUser : DocumentDbIdentityUser<TRole>
         where TRole : DocumentDbIdentityRole
@@ -915,7 +919,85 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             return Task.CompletedTask;
         }
 
-        #region IDisposable Support
+#if NETSTANDARD2
+        public Task SetAuthenticatorKeyAsync(TUser user, string key, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user.AuthenticatorKey = key;
+
+            return Task.CompletedTask;
+        }
+
+        public Task<string> GetAuthenticatorKeyAsync(TUser user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            return Task.FromResult(user.AuthenticatorKey);
+        }
+
+        public Task ReplaceCodesAsync(TUser user, IEnumerable<string> recoveryCodes, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            user.RecoveryCodes = recoveryCodes;
+
+            return Task.CompletedTask;
+        }
+
+        public async Task<bool> RedeemCodeAsync(TUser user, string code, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            if (user.RecoveryCodes.Contains(code))
+            {
+                var codes = user.RecoveryCodes.Where(x => x != code);
+                await ReplaceCodesAsync(user, codes, cancellationToken);
+                return true;
+            }
+            return false;
+        }
+
+        public Task<int> CountCodesAsync(TUser user, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            ThrowIfDisposed();
+
+            if (user == null)
+            {
+                throw new ArgumentNullException(nameof(user));
+            }
+
+            var recoveryCodesCount = user.RecoveryCodes?.Count();
+            return Task.FromResult(recoveryCodesCount ?? 0);
+        }
+#endif
+
+#region IDisposable Support
 
         public void Dispose()
         {
@@ -923,6 +1005,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             disposed = false;
         }
 
-        #endregion
+#endregion
     }
 }
