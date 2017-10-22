@@ -74,6 +74,12 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Builder
             return this;
         }
 
+        public DocumentDbIdentityUserBuilder AddClaim(Claim claim)
+        {
+            identityUser.Claims.Add(claim);
+            return this;
+        }
+
         public DocumentDbIdentityUserBuilder AddRole(DocumentDbIdentityRole role = null)
         {
             if (role == null)
