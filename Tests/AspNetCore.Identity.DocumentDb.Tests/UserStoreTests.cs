@@ -192,7 +192,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             await roleStore.CreateAsync(someNotTargetedRole, CancellationToken.None);
             
             // Add the user to a role name different than the role created before, expecting an exception
-            await Assert.ThrowsAsync(typeof(ArgumentException), async () => await userStore.AddToRoleAsync(targetUser, "NotExistantRole", CancellationToken.None));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await userStore.AddToRoleAsync(targetUser, "NotExistantRole", CancellationToken.None));
         }
 
         [Fact]
@@ -207,7 +207,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             await roleStore.CreateAsync(targetRole, CancellationToken.None);
 
             // Add the user to the created role, but pass the not normalized name, expecting an exception
-            await Assert.ThrowsAsync(typeof(ArgumentException), async () => await userStore.AddToRoleAsync(targetUser, targetRole.Name, CancellationToken.None));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await userStore.AddToRoleAsync(targetUser, targetRole.Name, CancellationToken.None));
         }
 
         [Fact]
@@ -310,6 +310,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
 
             Assert.Equal(targetUser.Id, foundUser.Id);
         }
+
 #if NETCORE2
         [Fact]
         public async Task ShouldSetAuthenticatorKeyAsync()
@@ -414,5 +415,57 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             Assert.Equal(expectedCount, result);
         }
 #endif
+
+        [Fact]
+        public async Task ShouldAddClaimsToUser()
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser> userStore = CreateUserStore();
+            DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create();
+            Claim userCountryClaim = new Claim(ClaimTypes.Country, "Austria");
+            Claim userPostalCodeClaim = new Claim(ClaimTypes.PostalCode, "1010");
+            Claim[] claimsToAdd = new Claim[] { userCountryClaim, userPostalCodeClaim };
+
+            await userStore.AddClaimsAsync(targetUser, claimsToAdd, CancellationToken.None);
+
+            Assert.Equal(claimsToAdd, targetUser.Claims);
+        }
+
+        [Fact]
+        public async Task ShouldRemoveClaimsFromUserByPassingOriginalReferences()
+        {
+            DocumentDbUserStore<DocumentDbIdentityUser> userStore = CreateUserStore();
+            Claim userCountryClaim = new Claim(ClaimTypes.Country, "Austria");
+            Claim userPostalCodeClaim = new Claim(ClaimTypes.PostalCode, "1010");
+            Claim userNameClaim = new Claim(ClaimTypes.Name, "Name");
+            Claim[] claimsToRemove = new Claim[] { userCountryClaim, userNameClaim };
+
+            DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().AddClaim(userCountryClaim).AddClaim(userPostalCodeClaim);
+
+            await userStore.RemoveClaimsAsync(targetUser, claimsToRemove, CancellationToken.None);
+
+            Assert.DoesNotContain(userCountryClaim, targetUser.Claims);
+            Assert.DoesNotContain(userNameClaim, targetUser.Claims);
+        }
+
+        [Fact]
+        public async Task ShouldRemoveClaimsFromUserByValueComparison()
+        {
+            string userCountryClaimValue = "Austria";
+            string userPostalCodeValue = "1010";
+
+            DocumentDbUserStore<DocumentDbIdentityUser> userStore = CreateUserStore();
+            Claim userCountryClaim = new Claim(ClaimTypes.Country, userCountryClaimValue);
+            Claim userPostalCodeClaim = new Claim(ClaimTypes.PostalCode, userPostalCodeValue);
+            Claim userCountryClaimComparison = new Claim(ClaimTypes.Country, userCountryClaimValue);
+            Claim userPostalCodeClaimComparison = new Claim(ClaimTypes.PostalCode, userPostalCodeValue);
+            Claim[] claimsToRemove = new Claim[] { userCountryClaimComparison, userPostalCodeClaimComparison };
+
+            DocumentDbIdentityUser targetUser = DocumentDbIdentityUserBuilder.Create().AddClaim(userCountryClaim).AddClaim(userPostalCodeClaim);
+
+            await userStore.RemoveClaimsAsync(targetUser, claimsToRemove, CancellationToken.None);
+
+            Assert.DoesNotContain(userCountryClaim, targetUser.Claims);
+            Assert.DoesNotContain(userPostalCodeClaim, targetUser.Claims);
+        }
     }
 }

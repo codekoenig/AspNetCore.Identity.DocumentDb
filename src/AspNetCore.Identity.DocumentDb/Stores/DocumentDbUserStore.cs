@@ -18,7 +18,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
     /// </summary>
     /// <typeparam name="TUser">The type representing a user</typeparam>
     public class DocumentDbUserStore<TUser> : DocumentDbUserStore<TUser, DocumentDbIdentityRole>
-        where TUser: DocumentDbIdentityUser
+        where TUser : DocumentDbIdentityUser
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DocumentDbUserStore{TUser}"/>
@@ -339,7 +339,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(claims));
             }
 
-            IEnumerable<Claim> foundClaims = user.Claims.Where(c => claims.Any(rc => rc.Equals(c)));
+            IEnumerable<Claim> foundClaims = user.Claims.Where(c => claims.Any(rc => rc.Type == c.Type && rc.Value ==c.Value)).ToList();
 
             foreach (Claim claimToRemove in foundClaims)
             {
