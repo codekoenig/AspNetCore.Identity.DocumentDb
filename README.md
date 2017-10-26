@@ -4,12 +4,18 @@ AspNetCore.Identity.DocumentDb is a storage provider for ASP.NET Core Identity t
 as it's data store instead of the default SQL Server store. It supports all features of Identity, including **full role
 support** and **external authentication services**.
 
+## Framework support
+
+* .NET Standard 1.6
+* .NET Standard 2.0
+* .NET Framework 4.6+
+
 ## Add AspNetCore.Identity.DocumentDb to your project with NuGet
 
 Run the following command in Package Manager Console:
 
 ```shell
-Install-Package CodeKoenig.AspNetCore.Identity.DocumentDb -Pre
+Install-Package CodeKoenig.AspNetCore.Identity.DocumentDb
 ```
 
 ## Supported Identity features
@@ -54,8 +60,7 @@ public void ConfigureServices(IServiceCollection services)
         {
             options.Database = "YourDocumentDbDatabase";
             options.UserStoreDocumentCollection = "YourDocumentDbCollection";
-        })
-        .AddDefaultTokenProviders();
+        });
 
     // Further service configurations ...
 }
