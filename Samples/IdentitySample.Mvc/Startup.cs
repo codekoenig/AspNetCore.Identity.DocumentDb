@@ -50,9 +50,10 @@ namespace IdentitySample
         public void ConfigureServices(IServiceCollection services)
         {
             // Add DocumentDb client singleton instance (it's recommended to use a singleton instance for it)
-            services.AddSingleton<IDocumentClient>(InitializeDocumentClient(
+            services.AddDocumentClient(
                 Configuration.GetValue<Uri>("DocumentDbClient:EndpointUri"),
-                Configuration.GetValue<string>("DocumentDbClient:AuthorizationKey")));
+                Configuration.GetValue<string>("DocumentDbClient:AuthorizationKey"),
+                afterCreation: InitializeDocumentClient);
 
             // Add framework services.
 
@@ -99,11 +100,8 @@ namespace IdentitySample
             });
         }
 
-        private DocumentClient InitializeDocumentClient(Uri endpointUri, string authorizationKey)
+        private void InitializeDocumentClient(DocumentClient client)
         {
-            // Create a DocumentClient and an initial collection (if it does not exist yet) for sample purposes
-            DocumentClient client = new DocumentClient(endpointUri, authorizationKey, new ConnectionPolicy { EnableEndpointDiscovery = false });
-
             try
             {
                 // Does the DB exist?
@@ -144,8 +142,6 @@ namespace IdentitySample
                     return false;
                 });
             }
-
-            return client;
         }
     }
 }

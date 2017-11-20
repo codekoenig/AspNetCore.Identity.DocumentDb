@@ -23,16 +23,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests.Fixtures
 
         public DocumentDbFixture()
         {
-            // TODO: Until DocumentDB SDK exposes it's JSON.NET settings, we need to hijack the global settings to serialize claims
-            JsonConvert.DefaultSettings = () =>
-            {
-                return new JsonSerializerSettings()
-                {
-                    Converters = new List<JsonConverter>() { new JsonClaimConverter() }
-                };
-            };
-
-            Client = new DocumentClient(
+            Client = DocumentClientFactory.CreateClient(
                 serviceEndpoint: new Uri("https://localhost:8081", UriKind.Absolute),
                 authKeyOrResourceToken: "C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==",
                 connectionPolicy: new ConnectionPolicy() { EnableEndpointDiscovery = false });
