@@ -25,7 +25,7 @@ namespace AspNetCore.Identity.DocumentDb
             {
                 return new JsonSerializerSettings()
                 {
-                    Converters = new List<JsonConverter>() { new JsonClaimConverter() }
+                    Converters = new List<JsonConverter>() { new JsonClaimConverter(), new JsonClaimsPrincipalConverter(), new JsonClaimsIdentityConverter() }
                 };
             };
 
