@@ -17,3 +17,5 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("8d8507ba-f5ac-408d-9f4f-42966a72a1b5")]
+
+[assembly: InternalsVisibleToAttribute("AspNetCore.Identity.DocumentDb.Tests")]
