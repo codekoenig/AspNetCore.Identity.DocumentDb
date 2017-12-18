@@ -50,7 +50,7 @@ namespace IdentitySample
         public void ConfigureServices(IServiceCollection services)
         {
             // Add DocumentDb client singleton instance (it's recommended to use a singleton instance for it)
-            services.AddDocumentClient(
+            services.AddDefaultDocumentClientForIdentity(
                 Configuration.GetValue<Uri>("DocumentDbClient:EndpointUri"),
                 Configuration.GetValue<string>("DocumentDbClient:AuthorizationKey"),
                 afterCreation: InitializeDocumentClient);
