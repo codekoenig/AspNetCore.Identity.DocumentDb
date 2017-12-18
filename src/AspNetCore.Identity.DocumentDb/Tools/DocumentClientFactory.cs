@@ -11,6 +11,8 @@ namespace AspNetCore.Identity.DocumentDb.Tools
         {
             serializerSettings = serializerSettings ?? new JsonSerializerSettings();
             serializerSettings.Converters.Add(new JsonClaimConverter());
+            serializerSettings.Converters.Add(new JsonClaimsPrincipalConverter());
+            serializerSettings.Converters.Add(new JsonClaimsIdentityConverter());
 
 #if NETSTANDARD2
             return new DocumentClient(serviceEndpoint, authKeyOrResourceToken, serializerSettings, connectionPolicy, consistencyLevel);
