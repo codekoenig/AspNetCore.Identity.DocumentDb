@@ -5,9 +5,9 @@ using Newtonsoft.Json;
 
 namespace AspNetCore.Identity.DocumentDb.Tools
 {
-    public static class DocumentClientFactory
+    internal static class DocumentClientFactory
     {
-        public static DocumentClient CreateClient(Uri serviceEndpoint, string authKeyOrResourceToken, JsonSerializerSettings serializerSettings = null, ConnectionPolicy connectionPolicy = null, ConsistencyLevel? consistencyLevel = null)
+        internal static DocumentClient CreateClient(Uri serviceEndpoint, string authKeyOrResourceToken, JsonSerializerSettings serializerSettings = null, ConnectionPolicy connectionPolicy = null, ConsistencyLevel? consistencyLevel = null)
         {
             serializerSettings = serializerSettings ?? new JsonSerializerSettings();
             serializerSettings.Converters.Add(new JsonClaimConverter());
