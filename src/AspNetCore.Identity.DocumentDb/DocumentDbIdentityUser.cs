@@ -78,7 +78,7 @@ namespace AspNetCore.Identity.DocumentDb
         [JsonProperty(PropertyName = "accessFailedCount")]
         public int AccessFailedCount { get; set; }
 
-#if NETSTANDARD2
+#if (NETSTANDARD2 || NETSTANDARD21)
         [JsonProperty(PropertyName = "authenticatorKey")]
         public string AuthenticatorKey { get; set; }
 
