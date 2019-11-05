@@ -311,7 +311,7 @@ namespace AspNetCore.Identity.DocumentDb.Tests
             Assert.Equal(targetUser.Id, foundUser.Id);
         }
 
-#if NETCORE2
+#if (NETCORE2 || NETCORE3)
         [Fact]
         public async Task ShouldSetAuthenticatorKeyAsync()
         {

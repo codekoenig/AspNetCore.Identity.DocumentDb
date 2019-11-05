@@ -48,7 +48,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
         IUserTwoFactorStore<TUser>,
         IUserPhoneNumberStore<TUser>,
         IUserEmailStore<TUser>,
-#if NETSTANDARD2
+#if (NETSTANDARD2 || NETSTANDARD21)
         IUserAuthenticatorKeyStore<TUser>,
         IUserTwoFactorRecoveryCodeStore<TUser>,
 #endif
@@ -919,7 +919,7 @@ namespace AspNetCore.Identity.DocumentDb.Stores
             return Task.CompletedTask;
         }
 
-#if NETSTANDARD2
+#if (NETSTANDARD2 || NETSTANDARD21)
         public Task SetAuthenticatorKeyAsync(TUser user, string key, CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();

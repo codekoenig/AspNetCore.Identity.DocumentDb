@@ -6,7 +6,7 @@
     <AssemblyTitle>CodeKoenig.AspNetCore.Identity.DocumentDb</AssemblyTitle>
     <VersionPrefix>2.0.0</VersionPrefix>
     <Authors>Bernhard Koenig</Authors>
-    <TargetFrameworks>netstandard2.0;netstandard1.6;net46</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netstandard2.0;netstandard1.6;net46</TargetFrameworks>
     <AssemblyName>CodeKoenig.AspNetCore.Identity.DocumentDb</AssemblyName>
     <PackageId>CodeKoenig.AspNetCore.Identity.DocumentDb</PackageId>
     <PackageTags>DocumentDB;Cosmos DB;CosmosDB;AspNetCore;AspNet;Membership;Identity;Core;AspNetCore.Identity.DocumentDb</PackageTags>
@@ -37,13 +37,23 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.0.0" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="Microsoft.Azure.DocumentDB.Core" Version="2.8.1" />
+    <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="3.0.0" />
+  </ItemGroup>
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
     <PackageReference Include="Microsoft.Azure.DocumentDB" Version="2.1.3" />
+    <PackageReference Include="System.Net.Http" Version="4.3.1" />
   </ItemGroup>
 
   <PropertyGroup>
     <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.0'">$(DefineConstants);NETSTANDARD2</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants);NETSTANDARD21</DefineConstants>
   </PropertyGroup>
 </Project>
