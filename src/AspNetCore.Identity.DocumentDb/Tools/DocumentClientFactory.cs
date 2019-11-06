@@ -14,7 +14,7 @@ namespace AspNetCore.Identity.DocumentDb.Tools
             serializerSettings.Converters.Add(new JsonClaimsPrincipalConverter());
             serializerSettings.Converters.Add(new JsonClaimsIdentityConverter());
 
-#if (NETSTANDARD2 || NETSTANDARD21)
+#if (NETSTANDARD2 || NETSTANDARD21 || NET46)
             return new DocumentClient(serviceEndpoint, authKeyOrResourceToken, serializerSettings, connectionPolicy, consistencyLevel);
 #else
             // DocumentDB SDK only supports setting the JsonSerializerSettings on versions after NetStandard 2.0

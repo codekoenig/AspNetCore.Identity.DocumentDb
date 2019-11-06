@@ -38,12 +38,5 @@ namespace AspNetCore.Identity.DocumentDb.Tools
             string originalIssuer = (string)jo["OriginalIssuer"];
             return new Claim(type, value, valueType, issuer, originalIssuer);
         }
-
-        //private bool IsJson(string val)
-        //{
-        //    return (val != null &&
-        //            (val.StartsWith("[") && val.EndsWith("]")) ||
-        //            (val.StartsWith("{") && val.EndsWith("}")));
-        //}
     }
 }
