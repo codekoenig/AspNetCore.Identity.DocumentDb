@@ -57,4 +57,12 @@
     </None>
   </ItemGroup>
 
+  <PropertyGroup>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.0'">$(DefineConstants);NETSTANDARD2</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants);NETSTANDARD21</DefineConstants>
+  </PropertyGroup>
+
 </Project>
