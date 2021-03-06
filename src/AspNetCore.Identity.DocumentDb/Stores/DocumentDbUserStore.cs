@@ -570,11 +570,6 @@ namespace AspNetCore.Identity.DocumentDb.Stores
                 throw new ArgumentNullException(nameof(user));
             }
 
-            if (passwordHash == null)
-            {
-                throw new ArgumentNullException(nameof(passwordHash));
-            }
-
             user.PasswordHash = passwordHash;
 
             return Task.CompletedTask;
